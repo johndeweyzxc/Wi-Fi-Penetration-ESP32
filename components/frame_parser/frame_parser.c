@@ -1,31 +1,42 @@
 #include "frame_parser.h"
 
+#include <stdio.h>
+
 #include "arpa/inet.h"
 #include "eapol_frame.h"
 #include "eapol_validator.h"
 #include "esp_err.h"
 #include "esp_event.h"
-#include "esp_log.h"
 #include "esp_wifi_types.h"
 #include "frame_output.h"
 
-static const char *TAG = "FRAME_PARSER";
+ESP_EVENT_DEFINE_BASE(FRAME_RECEIVED_EVENT_BASE);
+ESP_EVENT_DEFINE_BASE(ARMAMENT_ATTACK_STATUS_EVENT_BASE);
 static uint8_t *bssid = NULL;
 static uint8_t parse_type = NULL_PARSE_TYPE;
-ESP_EVENT_DEFINE_BASE(FRAME_RECEIVED_EVENT_BASE);
+
+void post_pmkid_attack_notification() {
+  printf("Notifying armament pmkid attack\n");
+  arma_atk_event_data_t event_data;
+  event_data.atk_context = PMKID_BASED;
+  ESP_ERROR_CHECK(esp_event_post(ARMAMENT_ATTACK_STATUS_EVENT_BASE,
+                                 ATK_STATS_EVENT_ID, &event_data,
+                                 sizeof(event_data), portMAX_DELAY));
+}
 
 void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
                  key_information_t *key_info) {
   if (key_info->key_type == 1 && key_info->key_ack == 1 &&
       key_info->install == 0) {
     wpa_key_data_t *key_data = (wpa_key_data_t *)wpa_data->wpa_key_data;
-    if (eapol_has_valid_pmkid_key_data(key_data) == 0) {
-      return;
-    } else {
+    if (eapol_has_valid_pmkid_key_data(key_data) == GOOD_PMKID) {
       output_pmkid(eapol_frame);
+      post_pmkid_attack_notification();
+    } else {
+      return;
     }
   } else {
-    ESP_LOGI(TAG, "Parsing pmkid, this is not message 1...");
+    printf("PMKID, this is not msg 1\n");
   }
 }
 
@@ -33,16 +44,16 @@ void parse_mic(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
                key_information_t *key_info) {
   if (key_info->key_type == 1 && key_info->key_ack == 1 &&
       key_info->install == 0) {
-    output_mic_message_1(eapol_frame);
+    output_anonce_from_message_1(eapol_frame);
   } else {
-    ESP_LOGI(TAG, "Parsing mic, this is not message 1...");
+    printf("MIC, this is not msg 1\n");
   }
 
   if (key_info->key_type == 1 && key_info->key_mic == 1 &&
       key_info->secure == 0) {
-    output_mic_message_2(eapol_frame);
+    output_mic_from_message_2(eapol_frame);
   } else {
-    ESP_LOGI(TAG, "Parsing mic, this is not message 2...");
+    printf("MIC, this is not msg 2\n");
   }
 }
 
@@ -92,39 +103,39 @@ static void cb_data_handler(void *args, esp_event_base_t event_base,
   if (bssid_in_eapol_matched(eapol_frame, bssid) == BSSID_NOT_MATCHED) {
     return;
   }
-  // * Checks if authentication type is 0x888e
+  // * Checks if authentication type is Authentication (0x888e)
   if (is_eapol_auth_type(eapol_frame) == WRONG_EAPOL_AUTH_TYPE) {
     return;
   }
-  // * Checks if key type is 0x03
+  // * Checks if packet type is Key (0x03)
   if (wpa_data->type == EAPOL_KEY_TYPE) {
     parse_80211_authentication(wpa_data, eapol_frame);
   } else {
-    ESP_LOGW(TAG, "Wrong packet type, got %x...", wpa_data->type);
+    printf("Wrong packet type: %x\n", wpa_data->type);
   }
 }
 
 void frame_parser_unregister_data_frame_handler() {
   ESP_ERROR_CHECK(esp_event_handler_unregister(FRAME_RECEIVED_EVENT_BASE,
                                                DATA_FRAME, &cb_data_handler));
-  ESP_LOGI(TAG, "Data frame event handler unregistered...");
+  printf("Data frame event handler unregistered\n");
 }
 
 void frame_parser_register_data_frame_handler() {
   ESP_ERROR_CHECK(esp_event_handler_register(
       FRAME_RECEIVED_EVENT_BASE, DATA_FRAME, &cb_data_handler, NULL));
-  ESP_LOGI(TAG, "Data frame event handler registered...");
+  printf("Data frame event handler registered\n");
 }
 
 void frame_parser_clear_target_param() {
   bssid = NULL;
   parse_type = NULL_PARSE_TYPE;
-  ESP_LOGI(TAG, "Cleared target parameter...");
+  printf("Cleared target parameter\n");
 }
 
 void frame_parser_set_target_parameter(uint8_t *target_bssid,
                                        uint8_t selected_parse_type) {
   bssid = target_bssid;
   parse_type = selected_parse_type;
-  ESP_LOGI(TAG, "Set target parameter...");
+  printf("Target parameter set\n");
 }

@@ -8,6 +8,8 @@ ESP_EVENT_DECLARE_BASE(FRAME_RECEIVED_EVENT_BASE);
 
 enum filter_type { MANAGEMENT, CTRL, DATA };
 
+enum frame_event_id { DATA_FRAME, MGMT_FRAME, CTRL_FRAME };
+
 #define MAX_SCAN_AP 20
 typedef struct {
   uint16_t count;
@@ -23,9 +25,11 @@ void wifi_connect_to_ap(uint8_t *ssid_name, uint8_t ssid_length,
 
 void wifi_disconnect_from_ap(uint8_t *bssid);
 
+void wifi_set_channel(uint8_t channel);
+
 void wifi_set_filter(uint8_t filter_type);
 
-void wifi_sniffer_start(uint8_t filter_type);
+void wifi_sniffer_start();
 
 void wifi_sniffer_stop();
 

@@ -1,6 +1,8 @@
 #pragma once
 #include <stdint.h>
 
+enum filter_type { MANAGEMENT, CTRL, DATA };
+
 #define MAX_SCAN_AP 20
 typedef struct {
   uint16_t count;
@@ -16,9 +18,11 @@ void wifi_connect_to_ap(uint8_t *ssid_name, uint8_t ssid_length,
 
 void wifi_disconnect_from_ap(uint8_t *bssid);
 
+void wifi_set_channel(uint8_t channel);
+
 void wifi_set_filter(uint8_t filter_type);
 
-void wifi_sniffer_start(uint8_t filter_type);
+void wifi_sniffer_start();
 
 void wifi_sniffer_stop();
 
