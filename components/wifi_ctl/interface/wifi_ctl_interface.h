@@ -1,6 +1,8 @@
 #pragma once
 #include <stdint.h>
 
+#include "esp_wifi_types.h"
+
 enum filter_type { MANAGEMENT, CTRL, DATA };
 
 #define MAX_SCAN_AP 20
