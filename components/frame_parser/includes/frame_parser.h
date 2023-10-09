@@ -2,6 +2,7 @@
 #include <stdint.h>
 
 #include "eapol_frame.h"
+#include "esp_event.h"
 #include "frame_constants.h"
 
 enum parse_type_list { NULL_PARSE_TYPE, PARSE_PMKID, PARSE_MIC };
@@ -16,7 +17,7 @@ typedef struct {
   uint8_t atk_context;
 } arma_atk_event_data_t;
 
-void post_pmkid_attack_notification();
+void pmkid_attack_notify_armament();
 
 void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
                  key_information_t *key_info);
@@ -28,6 +29,9 @@ key_information_t perform_bitwise_on_key_info(uint16_t *key_info_16);
 
 void parse_80211_authentication(eapol_auth_data_t *wpa_data,
                                 eapol_frame_t *eapol_frame);
+
+static void data_frame_parser(void *args, esp_event_base_t event_base,
+                              int32_t event_id, void *event_data);
 
 void frame_parser_unregister_data_frame_handler();
 

@@ -15,7 +15,7 @@ enum return_status_eapol_matched { BSSID_NOT_MATCHED, BSSID_MATCHED };
 
 enum return_status_qos_data { NOT_QOS, IS_QOS };
 
-uint8_t eapol_has_valid_pmkid_key_data(wpa_key_data_t *key_data);
+uint8_t eapol_valid_pmkid(wpa_key_data_t *key_data);
 
 uint8_t is_eapol_auth_type(eapol_frame_t *eapol_frame);
 

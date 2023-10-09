@@ -27,10 +27,8 @@ static void armament_activate(void *args, esp_event_base_t event_base,
   }
 
   if (memcmp(arma_selected, RECONNAISSANCE, 2) == 0) {
-    printf("Using reconnaissance\n");
     arma_reconnaissance();
   } else if (memcmp(arma_selected, PMKID, 2) == 0) {
-    printf("Using pmkid based attack\n");
     arma_pmkid(target_bssid);
   } else if (memcmp(arma_selected, MIC, 2) == 0) {
     // TODO: Attack method is mic
@@ -39,14 +37,8 @@ static void armament_activate(void *args, esp_event_base_t event_base,
   }
 }
 
-void armament_cmd_event_register() {
+void arma_cmd_event_register() {
   ESP_ERROR_CHECK(esp_event_handler_register(ARMAMENT_CMD_EVENT_BASE, CMD_EVENT,
                                              &armament_activate, NULL));
-  printf("Cmd event handler registered\n");
-}
-
-void armament_cmd_event_unregister() {
-  ESP_ERROR_CHECK(esp_event_handler_unregister(ARMAMENT_CMD_EVENT_BASE,
-                                               CMD_EVENT, &armament_activate));
-  printf("Cmd event handler unregistered\n");
+  printf("armament.arma_cmd_event_register > Arma cmd handler registered\n");
 }

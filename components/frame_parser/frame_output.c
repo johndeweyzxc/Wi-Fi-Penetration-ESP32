@@ -7,8 +7,8 @@
 #include "frame_constants.h"
 
 void put_mac_addr_in_buff(char *char_buff, uint8_t *addr) {
-  sprintf(char_buff, "%02X:%02X:%02X:%02X:%02X:%02X,", addr[0], addr[1],
-          addr[2], addr[3], addr[4], addr[5]);
+  sprintf(char_buff, "%02X%02X%02X%02X%02X%02X,", addr[0], addr[1], addr[2],
+          addr[3], addr[4], addr[5]);
 }
 
 void put_nonce_in_buff(char *char_buff, uint8_t *n) {

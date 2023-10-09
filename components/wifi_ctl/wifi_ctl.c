@@ -23,7 +23,7 @@ void wifi_scan_aps() {
   ESP_ERROR_CHECK(
       esp_wifi_scan_get_ap_records(&ap_list.count, ap_list.ap_record_list));
 
-  printf("Found %u APs\n", ap_list.count);
+  printf("wifi_ctl.wifi_scan_aps > Found %u APs\n", ap_list.count);
 }
 
 ap_list_from_scan_t *wifi_get_scanned_aps() { return &ap_list; }
@@ -31,15 +31,15 @@ ap_list_from_scan_t *wifi_get_scanned_aps() { return &ap_list; }
 void wifi_connect_to_ap(uint8_t *ssid_name, uint8_t ssid_length,
                         uint8_t channel, uint8_t *bssid) {
   if (ssid_length <= 0 || ssid_length > 33) {
-    printf("Cannot connect to wifi\n");
-    printf("SSID length is %u\n", ssid_length);
+    printf("wifi_ctl.wifi_connect_to_ap > Cannot connect to wifi\n");
+    printf("wifi_ctl.wifi_connect_to_ap > SSID length is %u\n", ssid_length);
     return;
   }
 
-  printf("Connect to %02X:%02X:%02X:%02X:%02X:%02X\n", bssid[0], bssid[1],
-         bssid[2], bssid[3], bssid[4], bssid[5]);
-  printf("SSID is: %s\n", ssid_name);
-  printf("Channel is %u\n", channel);
+  printf("wifi_ctl.wifi_connect_to_ap > %02X%02X%02X%02X%02X%02X\n", bssid[0],
+         bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
+  printf("wifi_ctl.wifi_connect_to_ap > SSID is: %s\n", ssid_name);
+  printf("wifi_ctl.wifi_connect_to_ap > Channel is %u\n", channel);
 
   wifi_config_t wifi_config = {
       .sta = {.channel = channel,
@@ -57,13 +57,13 @@ void wifi_connect_to_ap(uint8_t *ssid_name, uint8_t ssid_length,
 
 void wifi_disconnect_from_ap(uint8_t *bssid) {
   ESP_ERROR_CHECK(esp_wifi_disconnect());
-  printf("Disconnected from %02X:%02X:%02X:%02X:%02X:%02X\n", bssid[0],
-         bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
+  printf("wifi_ctl.wifi_disconnect_from_ap > %02X:%02X:%02X:%02X:%02X:%02X\n",
+         bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
 }
 
 void wifi_set_channel(uint8_t channel) {
   esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
-  printf("Wifi channel set to %u\n", channel);
+  printf("wifi_ctl.wifi_set_channel > Wifi channel set to %u\n", channel);
 }
 
 void wifi_set_filter(uint8_t filter_type) {
@@ -72,15 +72,15 @@ void wifi_set_filter(uint8_t filter_type) {
   switch (filter_type) {
     case MANAGEMENT:
       filter.filter_mask |= WIFI_PROMIS_FILTER_MASK_MGMT;
-      printf("Filter set to mgt frames\n");
+      printf("wifi_ctl.wifi_set_filter > Filter set to mgt frames\n");
       break;
     case CTRL:
       filter.filter_mask |= WIFI_PROMIS_FILTER_MASK_CTRL;
-      printf("Filter set to ctrl frames\n");
+      printf("wifi_ctl.wifi_set_filter > Filter set to ctrl frames\n");
       break;
     case DATA:
       filter.filter_mask |= WIFI_PROMIS_FILTER_MASK_DATA;
-      printf("Frame filter set to data frames\n");
+      printf("wifi_ctl.wifi_set_filter > Frame filter set to data frames\n");
       break;
   }
 
@@ -102,7 +102,7 @@ static void received_frame(void *buf, wifi_promiscuous_pkt_type_t type) {
       event_id = CTRL_FRAME;
       break;
     default:
-      printf("Unknown frame\n");
+      printf("wifi_ctl.received_frame > Unknown frame\n");
       return;
   }
 
@@ -114,12 +114,12 @@ static void received_frame(void *buf, wifi_promiscuous_pkt_type_t type) {
 void wifi_sniffer_start() {
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_rx_cb(&received_frame);
-  printf("Promiscuous mode started\n");
+  printf("wifi_ctl.wifi_sniffer_start > Promiscuous mode started\n");
 }
 
 void wifi_sniffer_stop() {
   esp_wifi_set_promiscuous(false);
-  printf("Promiscuous mode stopped\n");
+  printf("wifi_ctl.wifi_sniffer_start > Promiscuous mode stopped\n");
 }
 
 static void wifi_event_handler(void *event_handler_arg,
@@ -139,5 +139,5 @@ void wifi_app_init() {
                                              &wifi_event_handler, NULL));
 
   ESP_ERROR_CHECK(esp_wifi_start());
-  printf("Initialized wifi\n");
+  printf("wifi_ctl.wifi_app_init > Initialized wifi\n");
 }

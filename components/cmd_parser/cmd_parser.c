@@ -15,7 +15,7 @@ void clear_user_in_buff(char *user_in_buff) {
   for (uint8_t i = 0; i < 14; i++) {
     user_in_buff[i] = '0';
   }
-  printf("Cleared user input buffer\n");
+  printf("cmd_parser.clear_user_in_buff > *\n");
 }
 
 void clear_arma_and_bssid_buff(char *arma_selected, char *target_bssid) {
@@ -25,17 +25,18 @@ void clear_arma_and_bssid_buff(char *arma_selected, char *target_bssid) {
   for (uint8_t i = 0; i < 6; i++) {
     target_bssid[i] = '0';
   }
-  printf("Cleared arma and bssid buffer\n");
+  printf("cmd_parser.clear_arma_and_bssid_buff > *\n");
 }
 
-void set_arma_selected_and_target(char *user_in_buff, char *arma_selected,
-                                  char *target_bssid) {
+void set_arma_and_target(char *user_in_buff, char *arma_selected,
+                         char *target_bssid) {
   arma_selected[0] = user_in_buff[0];
   arma_selected[1] = user_in_buff[1];
 
   user_in_buff += 2;
   memcpy(target_bssid, user_in_buff, 12);
-  printf("Set target bssid: %s\n", target_bssid);
+  printf("cmd_parser.set_arma_and_target > Set target bssid: %s\n",
+         target_bssid);
 }
 
 void set_arma_selected(char *user_in_buff, char *arma_selected) {
@@ -45,9 +46,9 @@ void set_arma_selected(char *user_in_buff, char *arma_selected) {
 
 void output_arma_status(char *arma_selected, char *target_bssid) {
   if (arma_selected[0] == '0' && arma_selected[1] == '1') {
-    printf("{CURRENT_ARMA,%c%c}\n", arma_selected[0], arma_selected[1]);
+    printf("{CURRENT_ARMA,%c%c,}\n", arma_selected[0], arma_selected[1]);
   } else {
-    printf("{CURRENT_ARMA,%c%c,%s}\n", arma_selected[0], arma_selected[1],
+    printf("{CURRENT_ARMA,%c%c,%s,}\n", arma_selected[0], arma_selected[1],
            target_bssid);
   }
 }
@@ -70,8 +71,8 @@ void cmd_parser() {
       clear_user_in_buff(user_in_buff);
 
     } else if (memcmp(user_in_buff, ARMA_ACTIVATE, 2) == 0) {
-      printf("Armament activate!\n");
-      armament_cmd_event_register();
+      printf("cmd_parser.cmd_parser > Armament activate!\n");
+      arma_cmd_event_register();
 
       armament_cmd_event_data cmd_event_data = {
           .arma_selected = arma_selected,
@@ -89,7 +90,7 @@ void cmd_parser() {
 
       clear_user_in_buff(user_in_buff);
       clear_arma_and_bssid_buff(arma_selected, target_bssid);
-      printf("Armament deactivated!\n");
+      printf("cmd_parser.cmd_parser > Armament deactivated!\n");
 
     } else if (memcmp(user_in_buff, NULL_ARMA, 2) == 0) {
       continue;
@@ -97,7 +98,7 @@ void cmd_parser() {
       if (memcmp(user_in_buff, RECONNAISSANCE, 2) == 0) {
         set_arma_selected(user_in_buff, arma_selected);
       } else {
-        set_arma_selected_and_target(user_in_buff, arma_selected, target_bssid);
+        set_arma_and_target(user_in_buff, arma_selected, target_bssid);
       }
       clear_user_in_buff(user_in_buff);
     }
@@ -108,5 +109,5 @@ void cmd_parser_create_task() {
   xTaskCreatePinnedToCore(cmd_parser, CMD_PARSER_TASK_NAME,
                           CMD_PARSER_STACK_SIZE, NULL, CMD_PARSER_TASK_PRIORITY,
                           &cmd_parser_task_handle, CMD_PARSER_CORE_TO_USE);
-  printf("Cmd parser task created\n");
+  printf("cmd_parser.cmd_parser_create_task > Cmd parser task created\n");
 }

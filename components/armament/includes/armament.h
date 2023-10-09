@@ -22,6 +22,7 @@ typedef struct {
   char *target_bssid;
 } armament_cmd_event_data;
 
-void armament_cmd_event_register();
+static void armament_activate(void *args, esp_event_base_t event_base,
+                              int32_t event_id, void *event_data);
 
-void armament_cmd_event_unregister();
+void arma_cmd_event_register();

@@ -29,6 +29,8 @@ void wifi_set_channel(uint8_t channel);
 
 void wifi_set_filter(uint8_t filter_type);
 
+static void received_frame(void *buf, wifi_promiscuous_pkt_type_t type);
+
 void wifi_sniffer_start();
 
 void wifi_sniffer_stop();

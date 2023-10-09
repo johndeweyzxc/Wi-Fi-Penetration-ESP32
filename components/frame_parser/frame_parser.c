@@ -15,8 +15,8 @@ ESP_EVENT_DEFINE_BASE(ARMAMENT_ATTACK_STATUS_EVENT_BASE);
 static uint8_t *bssid = NULL;
 static uint8_t parse_type = NULL_PARSE_TYPE;
 
-void post_pmkid_attack_notification() {
-  printf("Notifying armament pmkid attack\n");
+void pmkid_attack_notify_armament() {
+  printf("frame_parser.pmkid_attack_notify_armament > *\n");
   arma_atk_event_data_t event_data;
   event_data.atk_context = PMKID_BASED;
   ESP_ERROR_CHECK(esp_event_post(ARMAMENT_ATTACK_STATUS_EVENT_BASE,
@@ -29,14 +29,14 @@ void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
   if (key_info->key_type == 1 && key_info->key_ack == 1 &&
       key_info->install == 0) {
     wpa_key_data_t *key_data = (wpa_key_data_t *)wpa_data->wpa_key_data;
-    if (eapol_has_valid_pmkid_key_data(key_data) == GOOD_PMKID) {
+    if (eapol_valid_pmkid(key_data) == GOOD_PMKID) {
       output_pmkid(eapol_frame);
-      post_pmkid_attack_notification();
+      pmkid_attack_notify_armament();
     } else {
       return;
     }
   } else {
-    printf("PMKID, this is not msg 1\n");
+    printf("frame_parser.parse_pmkid > This is not msg 1\n");
   }
 }
 
@@ -46,14 +46,14 @@ void parse_mic(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
       key_info->install == 0) {
     output_anonce_from_message_1(eapol_frame);
   } else {
-    printf("MIC, this is not msg 1\n");
+    printf("frame_parser.parse_mic > This is not msg 1\n");
   }
 
   if (key_info->key_type == 1 && key_info->key_mic == 1 &&
       key_info->secure == 0) {
     output_mic_from_message_2(eapol_frame);
   } else {
-    printf("MIC, this is not msg 2\n");
+    printf("frame_parser.parse_mic > This is not msg 2\n");
   }
 }
 
@@ -88,8 +88,8 @@ void parse_80211_authentication(eapol_auth_data_t *wpa_data,
   }
 }
 
-static void cb_data_handler(void *args, esp_event_base_t event_base,
-                            int32_t event_id, void *event_data) {
+static void data_frame_parser(void *args, esp_event_base_t event_base,
+                              int32_t event_id, void *event_data) {
   wifi_promiscuous_pkt_t *frame = (wifi_promiscuous_pkt_t *)event_data;
   eapol_frame_t *eapol_frame = (eapol_frame_t *)frame->payload;
   frame_control_t *frame_control = &eapol_frame->frame_control;
@@ -111,31 +111,32 @@ static void cb_data_handler(void *args, esp_event_base_t event_base,
   if (wpa_data->type == EAPOL_KEY_TYPE) {
     parse_80211_authentication(wpa_data, eapol_frame);
   } else {
-    printf("Wrong packet type: %x\n", wpa_data->type);
+    printf("frame_parser.data_frame_parser > Wrong packet type: %x\n",
+           wpa_data->type);
   }
 }
 
 void frame_parser_unregister_data_frame_handler() {
   ESP_ERROR_CHECK(esp_event_handler_unregister(FRAME_RECEIVED_EVENT_BASE,
-                                               DATA_FRAME, &cb_data_handler));
-  printf("Data frame event handler unregistered\n");
+                                               DATA_FRAME, &data_frame_parser));
+  printf("frame_parser.frame_parser_unregister_data_frame_handler > *\n");
 }
 
 void frame_parser_register_data_frame_handler() {
   ESP_ERROR_CHECK(esp_event_handler_register(
-      FRAME_RECEIVED_EVENT_BASE, DATA_FRAME, &cb_data_handler, NULL));
-  printf("Data frame event handler registered\n");
+      FRAME_RECEIVED_EVENT_BASE, DATA_FRAME, &data_frame_parser, NULL));
+  printf("frame_parser.frame_parser_register_data_frame_handler > *\n");
 }
 
 void frame_parser_clear_target_param() {
   bssid = NULL;
   parse_type = NULL_PARSE_TYPE;
-  printf("Cleared target parameter\n");
+  printf("frame_parser.frame_parser_clear_target_param > *\n");
 }
 
 void frame_parser_set_target_parameter(uint8_t *target_bssid,
                                        uint8_t selected_parse_type) {
   bssid = target_bssid;
   parse_type = selected_parse_type;
-  printf("Target parameter set\n");
+  printf("frame_parser.frame_parser_set_target_parameter > *\n");
 }
