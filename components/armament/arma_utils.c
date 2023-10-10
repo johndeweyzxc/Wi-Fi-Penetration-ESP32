@@ -1,10 +1,16 @@
+/*
+ * @file arma_utils.c
+ * @author johndeweyzxc (johndewey02003@gmail.com)
+ * @brief Implements functionality for utils such as formatting outputs
+ */
+
 #include "arma_utils.h"
 
 #include <stdio.h>
 
 #include "esp_wifi_types.h"
 
-void output_ap(wifi_ap_record_t *ap_record) {
+void output_ap_info(wifi_ap_record_t *ap_record) {
   uint8_t *bssid = ap_record->bssid;
   char output_buffer[100];
   char *p_output_buffer = output_buffer;

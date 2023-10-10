@@ -1,3 +1,10 @@
+/*
+ * @file eapol_frame.h
+ * @author johndeweyzxc (johndewey02003@gmail.com)
+ * @brief Declaration of EAPOL data frame structure where key vital information
+ * in wifi penetration is found, the PMKID and MIC.
+ */
+
 #pragma once
 
 #include <stdint.h>
@@ -5,8 +12,8 @@
 #include "frame_constants.h"
 
 /*
+ * @brief WPA PMKID key data (22 bytes)
  * See ref: 802.11-2016 12.7.2
- * Size: 22 bytes
  */
 typedef struct {
   uint8_t key_data_type;
@@ -17,8 +24,8 @@ typedef struct {
 } wpa_key_data_t;
 
 /*
+ * @brief Key information data (2 bytes)
  * See ref: 802.11-2016 12.7.2
- * Size: 2 bytes
  */
 typedef struct {
   uint8_t reserved : 2;
@@ -36,8 +43,10 @@ typedef struct {
 } key_information_t;
 
 /*
+ * @brief Authentication data. TODO: The length of MIC is dependent on the
+ * negotiated AKM, see ref: 802.11-2016 12.7.3
+ *
  * See ref: 802.11-2016 12.7.2
- * Note: The length of MIC is dependent on the negotiated AKM, see 12.7.3
  */
 typedef struct __attribute__((__packed__)) {
   uint8_t version;
@@ -57,7 +66,7 @@ typedef struct __attribute__((__packed__)) {
 } eapol_auth_data_t;
 
 /*
- * Size: 8 bytes
+ * @brief: Logical Link Control (8 bytes)
  */
 typedef struct {
   uint8_t dsap_snap;
@@ -68,7 +77,7 @@ typedef struct {
 } logical_link_control_t;
 
 /*
- * Note: Overall structure of the eapol frames
+ * @brief Structure of the eapol frame
  */
 typedef struct {
   frame_control_t frame_control;

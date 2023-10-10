@@ -1,7 +1,13 @@
+/*
+ * @file frame_constants.h
+ * @author johndeweyzxc (johndewey02003@gmail.com)
+ * @brief Declaration of a frame structure that is found on all types of frame
+ */
+
 #pragma once
 
 /*
- * Size: 2 bytes
+ * @brief Frame control (2 bytes)
  */
 typedef struct __attribute__((__packed__)) {
   uint8_t protocol_version : 2;
@@ -17,7 +23,7 @@ typedef struct __attribute__((__packed__)) {
 } frame_control_t;
 
 /*
- * Size: 18 bytes
+ * @brief Mac header (18 bytes)
  */
 typedef struct {
   uint8_t receiver_addr[6];

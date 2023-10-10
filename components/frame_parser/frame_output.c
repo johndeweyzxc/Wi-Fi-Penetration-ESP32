@@ -1,3 +1,10 @@
+/*
+ * @file frame_output.c
+ * @author johndeweyzxc (johndewey02003@gmail.com)
+ * @brief Implements functionality for formatting and ouputting the result from
+ * the attack
+ */
+
 #include "frame_output.h"
 
 #include <stdio.h>
@@ -54,10 +61,13 @@ void output_pmkid(eapol_frame_t *message_1) {
 
   char m1_buffer[90];
   char *p_m1_buffer = m1_buffer;
+  // Receiver address (Station)
   put_mac_addr_in_buff(p_m1_buffer, mac_header->receiver_addr);
   p_m1_buffer += 13;
+  // BSSID (Access point)
   put_mac_addr_in_buff(p_m1_buffer, mac_header->bssid);
   p_m1_buffer += 13;
+  // PMKID
   put_key_in_buff(p_m1_buffer, key_data->pmkid);
   printf("{PMKID,%s}\n", m1_buffer);
 }
@@ -69,7 +79,7 @@ void output_anonce_from_message_1(eapol_frame_t *message_1) {
   char m1_buffer[120];
   put_mac_addr_in_buff(m1_buffer, mac_header_message_1->bssid);
   put_mac_addr_in_buff(m1_buffer, mac_header_message_1->transmitter_addr);
-  // * Anonce (Access point nonce)
+  // Anonce (Access point nonce)
   put_nonce_in_buff(m1_buffer, auth_message_1->wpa_key_nonce);
   printf("{MIC_MSG_1,%s}\n", m1_buffer);
 }
@@ -83,11 +93,11 @@ void output_mic_from_message_2(eapol_frame_t *message_2) {
   put_mac_addr_in_buff(m2_buffer, mac_header_message_2->bssid);
   put_mac_addr_in_buff(m2_buffer + 18, mac_header_message_2->bssid);
   put_m2_info_in_buff(m2_buffer + 36, auth_message_2);
-  // * Snonce (Station nonce)
+  // Snonce (Station nonce)
   put_nonce_in_buff(m2_buffer + 54, auth_message_2->wpa_key_nonce);
-  // * MIC (Message Integrity Check)
+  // MIC (Message Integrity Check)
   put_key_in_buff(m2_buffer + 108, auth_message_2->wpa_key_mic);
-  // * Key data
+  // Key data
   put_key_data_in_buff(m2_buffer + 216, auth_message_2->wpa_key_data,
                        key_data_length);
   printf("{MIC_MSG_2,%s}\n", m2_buffer);

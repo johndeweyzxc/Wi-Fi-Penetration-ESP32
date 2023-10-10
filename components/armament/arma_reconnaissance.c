@@ -1,3 +1,9 @@
+/*
+ * @file arma_reconnaissance.c
+ * @author johndeweyzxc (johndewey02003@gmail.com)
+ * @brief Declaration of methods for scanning nearby access points
+ */
+
 #include "arma_reconnaissance.h"
 
 #include <stdio.h>
@@ -14,6 +20,6 @@ void arma_reconnaissance() {
 
   for (uint16_t i = 0; i < total_scanned_aps; i++) {
     wifi_ap_record_t ap_record = ap_records[i];
-    output_ap(&ap_record);
+    output_ap_info(&ap_record);
   }
 }

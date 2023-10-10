@@ -1,3 +1,9 @@
+/*
+ * @file frame_parser.c
+ * @author johndeweyzxc (johndewey02003@gmail.com)
+ * @brief Implements functionality for parsing frames of type data
+ */
+
 #include "frame_parser.h"
 
 #include <stdio.h>
@@ -15,8 +21,8 @@ ESP_EVENT_DEFINE_BASE(ARMAMENT_ATTACK_STATUS_EVENT_BASE);
 static uint8_t *bssid = NULL;
 static uint8_t parse_type = NULL_PARSE_TYPE;
 
-void pmkid_attack_notify_armament() {
-  printf("frame_parser.pmkid_attack_notify_armament > *\n");
+void pmkid_notify_armament() {
+  printf("frame_parser.pmkid_notify_armament > *\n");
   arma_atk_event_data_t event_data;
   event_data.atk_context = PMKID_BASED;
   ESP_ERROR_CHECK(esp_event_post(ARMAMENT_ATTACK_STATUS_EVENT_BASE,
@@ -31,7 +37,7 @@ void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
     wpa_key_data_t *key_data = (wpa_key_data_t *)wpa_data->wpa_key_data;
     if (eapol_valid_pmkid(key_data) == GOOD_PMKID) {
       output_pmkid(eapol_frame);
-      pmkid_attack_notify_armament();
+      pmkid_notify_armament();
     } else {
       return;
     }
@@ -95,7 +101,7 @@ static void data_frame_parser(void *args, esp_event_base_t event_base,
   frame_control_t *frame_control = &eapol_frame->frame_control;
   eapol_auth_data_t *wpa_data = (eapol_auth_data_t *)eapol_frame->auth_data;
 
-  // * Checks if it is a IEEE 802.11 QoS data
+  // Checks if it is a IEEE 802.11 QoS data
   if (is_qos_data(frame_control) == NOT_QOS) {
     return;
   }
@@ -103,11 +109,11 @@ static void data_frame_parser(void *args, esp_event_base_t event_base,
   if (bssid_in_eapol_matched(eapol_frame, bssid) == BSSID_NOT_MATCHED) {
     return;
   }
-  // * Checks if authentication type is Authentication (0x888e)
+  // Checks if authentication type is Authentication (0x888e)
   if (is_eapol_auth_type(eapol_frame) == WRONG_EAPOL_AUTH_TYPE) {
     return;
   }
-  // * Checks if packet type is Key (0x03)
+  // Checks if packet type is Key (0x03)
   if (wpa_data->type == EAPOL_KEY_TYPE) {
     parse_80211_authentication(wpa_data, eapol_frame);
   } else {
@@ -128,10 +134,10 @@ void frame_parser_register_data_frame_handler() {
   printf("frame_parser.frame_parser_register_data_frame_handler > *\n");
 }
 
-void frame_parser_clear_target_param() {
+void frame_parser_clear_target_parameter() {
   bssid = NULL;
   parse_type = NULL_PARSE_TYPE;
-  printf("frame_parser.frame_parser_clear_target_param > *\n");
+  printf("frame_parser.frame_parser_clear_target_parameter > *\n");
 }
 
 void frame_parser_set_target_parameter(uint8_t *target_bssid,

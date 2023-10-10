@@ -1,3 +1,9 @@
+/*
+ * @file cmd_parser.c
+ * @author johndeweyzxc (johndewey02003@gmail.com)
+ * @brief Implements functionality for parsing the input command
+ */
+
 #include "cmd_parser.h"
 
 #include <stdio.h>
@@ -65,7 +71,6 @@ void cmd_parser() {
     vTaskDelay(CMD_INPUT_DELAY / portTICK_PERIOD_MS);
     scanf("%14s", user_in_buff);
 
-    // TODO: Fixed this
     if (memcmp(user_in_buff, ARMA_STATUS, 2) == 0) {
       output_arma_status(arma_selected, target_bssid);
       clear_user_in_buff(user_in_buff);

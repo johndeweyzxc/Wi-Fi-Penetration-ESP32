@@ -1,3 +1,9 @@
+/*
+ * @file wifi_ctl.c
+ * @author johndeweyzxc (johndewey02003@gmail.com)
+ * @brief Implements the functionality for controlling the behaviour of wifi
+ */
+
 #include "wifi_ctl.h"
 
 #include <stdio.h>
@@ -9,6 +15,7 @@
 #include "esp_wifi.h"
 #include "esp_wifi_types.h"
 
+ESP_EVENT_DECLARE_BASE(FRAME_RECEIVED_EVENT_BASE);
 static ap_list_from_scan_t ap_list;
 
 void wifi_scan_aps() {
@@ -62,6 +69,7 @@ void wifi_disconnect_from_ap(uint8_t *bssid) {
 }
 
 void wifi_set_channel(uint8_t channel) {
+  // TODO: Check if channel is between 1 and 14
   esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
   printf("wifi_ctl.wifi_set_channel > Wifi channel set to %u\n", channel);
 }
@@ -104,6 +112,7 @@ static void received_frame(void *buf, wifi_promiscuous_pkt_type_t type) {
     default:
       printf("wifi_ctl.received_frame > Unknown frame\n");
       return;
+      // TODO: Add case statement for MISC frame type
   }
 
   size_t data_size = frame->rx_ctrl.sig_len + sizeof(wifi_promiscuous_pkt_t);
