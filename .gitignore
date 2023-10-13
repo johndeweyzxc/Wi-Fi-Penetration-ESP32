@@ -1,2 +1,10 @@
 build
 .vscode
+Testcases.txt
+docs/Key-Hierarchy.drawio
+docs/Launcher-Module-Software-Architecture.drawio
+docs/4-Way-Handshake.drawio
+key_hierarchy/key_hierarchy_calculation_test.py
+key_hierarchy/mic_test.yaml
+key_hierarchy/pmkid_test.yaml
+utils/hexdumper.py

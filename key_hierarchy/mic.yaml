@@ -1,0 +1,14 @@
+# Insert PSK or password of your access point
+psk: ""
+# Name of your access point
+ssid: ""
+# Mac address of your access point
+bssid: ""
+# Mac address of the client or station connected to the access point
+sta_mac: ""
+# Anonce or authenticator nonce sent by access point on the first message
+anonce: ""
+# Snonce or supplicant nonce set by client on the second message
+snonce: ""
+# Message 2 or the whole authentication data on the second message
+m2_data: ""

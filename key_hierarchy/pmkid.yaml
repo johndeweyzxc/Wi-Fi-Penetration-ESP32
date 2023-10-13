@@ -1,0 +1,8 @@
+# Insert PSK or password of your access point
+psk: ""
+# Name of your access point
+ssid: ""
+# Mac address of your access point
+bssid: ""
+# Mac address of the client or station connected to the access point
+sta_mac: ""
