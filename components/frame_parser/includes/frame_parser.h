@@ -40,15 +40,9 @@ enum arma_atk_notify_context { PMKID_BASED, MIC_BASED };
 /*
  * @brief Event data to notify about the status of the attack, it contains
  * atk_context, which can be either PMKID_BASED or MIC_BASED
- * message_number, first message or second message
- * bssid, mac address of access point
- * station_mac, mac address of station
  */
 typedef struct {
   uint8_t atk_context;
-  uint8_t message_number;
-  uint8_t bssid[6];
-  uint8_t station_mac[6];
 } arma_atk_event_data_t;
 
 /*
@@ -72,7 +66,7 @@ void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
  * @brief Notifies armament about the status of the MIC attack by posting an
  * event to the event loop
  */
-void mic_notify_armament(uint8_t message_number, mac_header_t *mac_header);
+void mic_notify_armament();
 
 /*
  * @brief Parses the MIC and check if valid. If valid, it outputs the

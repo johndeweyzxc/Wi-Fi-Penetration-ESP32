@@ -28,7 +28,7 @@ void clear_arma_and_bssid_buff(char *arma_selected, char *target_bssid) {
   arma_selected[0] = '0';
   arma_selected[1] = '0';
 
-  for (uint8_t i = 0; i < 6; i++) {
+  for (uint8_t i = 0; i < 12; i++) {
     target_bssid[i] = '0';
   }
   printf("cmd_parser.clear_arma_and_bssid_buff > *\n");
@@ -41,9 +41,12 @@ void set_arma_and_target(char *user_in_buff, char *arma_selected,
 
   user_in_buff += 2;
   memcpy(target_bssid, user_in_buff, 12);
-  printf("cmd_parser.set_arma_and_target > Target: %02X%02X%02X%02X%02X%02X\n",
-         target_bssid[0], target_bssid[1], target_bssid[2], target_bssid[3],
-         target_bssid[4], target_bssid[5]);
+
+  printf("cmd_parser.set_arma_and_target > Target: ");
+  for (uint8_t i = 0; i < 12; i++) {
+    printf("%c", target_bssid[i]);
+  }
+  printf("\n");
 }
 
 void set_arma_selected(char *user_in_buff, char *arma_selected) {
@@ -55,8 +58,11 @@ void output_arma_status(char *arma_selected, char *target_bssid) {
   if (arma_selected[0] == '0' && arma_selected[1] == '1') {
     printf("{CURRENT_ARMA,%c%c,}\n", arma_selected[0], arma_selected[1]);
   } else {
-    printf("{CURRENT_ARMA,%c%c,%s,}\n", arma_selected[0], arma_selected[1],
-           target_bssid);
+    printf("{CURRENT_ARMA,%c%c,", arma_selected[0], arma_selected[1]);
+    for (uint8_t i = 0; i < 12; i++) {
+      printf("%c", target_bssid[i]);
+    }
+    printf(",}\n");
   }
 }
 

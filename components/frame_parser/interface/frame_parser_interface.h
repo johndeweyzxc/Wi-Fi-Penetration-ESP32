@@ -43,9 +43,6 @@ enum arma_atk_notify_context { PMKID_BASED, MIC_BASED };
  */
 typedef struct {
   uint8_t atk_context;
-  uint8_t message_number;
-  uint8_t bssid[6];
-  uint8_t station_mac[6];
 } arma_atk_event_data_t;
 
 /*

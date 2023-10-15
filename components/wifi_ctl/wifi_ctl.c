@@ -14,9 +14,14 @@
 #include "esp_netif.h"
 #include "esp_wifi.h"
 #include "esp_wifi_types.h"
+#include "frame_bypasser_interface.h"
 
 ESP_EVENT_DECLARE_BASE(FRAME_RECEIVED_EVENT_BASE);
 static ap_list_from_scan_t ap_list;
+
+void wifi_inject_frame(uint8_t *frame_buffer, int size) {
+  frame_bypasser_inject_frame(frame_buffer, size);
+}
 
 void wifi_scan_aps() {
   ap_list.count = MAX_SCAN_AP;

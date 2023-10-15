@@ -22,6 +22,9 @@ ESP_EVENT_DEFINE_BASE(ARMAMENT_ATTACK_STATUS_EVENT_BASE);
 static uint8_t *bssid = NULL;
 static uint8_t parse_type = NULL_PARSE_TYPE;
 
+static uint8_t mic_current_eapol_message_number = 0;
+static uint8_t mic_current_eapol_station_mac[6];
+
 void pmkid_notify_armament() {
   printf("frame_parser.pmkid_notify_armament > *\n");
   arma_atk_event_data_t event_data;
@@ -42,24 +45,15 @@ void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
     } else {
       return;
     }
-  } else {
-    printf("frame_parser.parse_pmkid > This is not msg 1\n");
   }
 }
 
-void mic_notify_armament(uint8_t message_number, mac_header_t *mac_header) {
+void mic_notify_armament() {
   printf("frame_parser.mic_notify_armament > *\n");
   arma_atk_event_data_t event_data;
-
   event_data.atk_context = MIC_BASED;
-  event_data.message_number = message_number;
-  memcpy(event_data.bssid, mac_header->bssid, 6);
-  if (message_number == 1) {
-    memcpy(event_data.station_mac, mac_header->receiver_addr, 6);
-  } else if (message_number == 2) {
-    memcpy(event_data.station_mac, mac_header->transmitter_addr, 6);
-  }
 
+  // TODO: Fix a bug that cause the system to crash
   ESP_ERROR_CHECK(esp_event_post(ARMAMENT_ATTACK_STATUS_EVENT_BASE,
                                  ATK_STATS_EVENT_ID, &event_data,
                                  sizeof(event_data), portMAX_DELAY));
@@ -71,18 +65,29 @@ void parse_mic(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
 
   if (key_info->key_type == 1 && key_info->key_ack == 1 &&
       key_info->install == 0) {
+    // TODO: Create function for preventing the output of the same frame over
+    // and over again
     output_anonce_from_message_1(eapol_frame);
-    mic_notify_armament(1, mac_header);
-  } else {
-    printf("frame_parser.parse_mic > This is not msg 1\n");
+    // mic_notify_armament(1, mac_header);
+
+    if (mic_current_eapol_message_number == 0) {
+      // TODO: Remove this memcpy function, this is unnecessary
+      memcpy(mic_current_eapol_station_mac, mac_header->receiver_addr, 6);
+      mic_current_eapol_message_number = 1;
+    }
   }
 
   if (key_info->key_type == 1 && key_info->key_mic == 1 &&
       key_info->secure == 0) {
+    // TODO: Create function for preventing the output of the same frame over
+    // and over again
     output_mic_from_message_2(eapol_frame);
-    mic_notify_armament(2, mac_header);
-  } else {
-    printf("frame_parser.parse_mic > This is not msg 2\n");
+    // mic_notify_armament(2, mac_header);
+
+    if (mic_current_eapol_message_number == 1) {
+      mic_current_eapol_message_number = 0;
+      mic_notify_armament();
+    }
   }
 }
 

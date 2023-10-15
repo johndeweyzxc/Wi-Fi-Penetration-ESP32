@@ -1,0 +1,5 @@
+## Frame Injector (frame_bypasser) component
+
+This is an auxiliary component utilized by the wifi_ctl component for the purpose of injecting arbitrary 802.11 frames. It is worth noting that injecting arbitrary frames is typically restricted by the function `ieee80211_raw_frame_sanity_check`, which validates the frame type. The utilization of the linker flag `-Wl,-zmuldefs` during the compilation process provides a means to circumvent this function. By doing so, this component can bypass the frame type validation, effectively causing the function to return a true value, thus permitting the injection of arbitrary frames.
+
+The function responsible for frame type validation was reverse-engineered and identified using the Ghidra analysis tool. For further details and in-depth information, please refer to this [GitHub repository](https://github.com/GANESH-ICMC/esp32-deauther).

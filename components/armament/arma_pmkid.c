@@ -56,12 +56,13 @@ void arma_delete_task_pmkid_sniff_duration() {
 
 void arma_pmkid_finishing_sequence(uint8_t from_sniff_task) {
   printf("arma_pmkid.arma_pmkid_finishing_sequence > Finishing sequence\n");
-  frame_parser_clear_target_parameter();
   frame_parser_unregister_data_frame_handler();
+  frame_parser_clear_target_parameter();
   arma_pmkid_notif_event_unregister();
   wifi_sniffer_stop();
   wifi_disconnect_from_ap(int_target_bssid);
   if (from_sniff_task == 0) {
+    // Kill the task PMKID sniff duration
     arma_delete_task_pmkid_sniff_duration();
   }
 }
@@ -89,6 +90,7 @@ void arma_pmkid_launching_sequence(uint8_t *ssid_name, uint8_t ssid_len,
   wifi_set_filter(DATA);
   wifi_set_channel(channel);
   wifi_connect_to_ap(ssid_name, ssid_len, channel, int_target_bssid);
+  // Create the task PMKID sniff duration
   xTaskCreatePinnedToCore(arma_pmkid_sniff_duration, TPS_NAME, TPS_STACK_SIZE,
                           NULL, TPS_PRIORITY, &pmkid_sniff_task_handle,
                           TPS_CORE_ID);

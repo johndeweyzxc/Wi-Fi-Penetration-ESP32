@@ -34,6 +34,13 @@ typedef struct {
 } ap_list_from_scan_t;
 
 /*
+ * @brief Injects raw arbitrary 802.11 frame
+ * @param *frame_buffer Buffer that contains the frame to be injected
+ * @param size Size of the frame buffer
+ */
+void wifi_inject_frame(uint8_t *frame_buffer, int size);
+
+/*
  * @brief Scans a maximum of 20 access points
  */
 void wifi_scan_aps();

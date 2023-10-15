@@ -27,7 +27,8 @@ void clear_user_in_buff(char *user_in_buff);
 void clear_arma_and_bssid_buff(char *arma_selected, char *target_bssid);
 
 /*
- * @brief Sets the target bssid and selected armament
+ * @brief Puts the target bssid and selected armament into their respective
+ * buffer from user input buffer.
  * @param *user_in_buff source from which the data of target bssid and selected
  * armament is first stored
  * @param *arma_selected buffer to store the selected armament (2 bytes)
@@ -37,7 +38,8 @@ void set_arma_and_target(char *user_in_buff, char *arma_selected,
                          char *target_bssid);
 
 /*
- * @brief Sets the selected armament, this function is use for reconnaissance
+ * @brief Puts the selected armament into the buffer from user input buffer.
+ * this function is use for reconnaissance
  * @param *user_in_buff source from which the selected armament is first stored
  * @param *arma_selected buffer to store the selected armament (2 bytes)
  */
