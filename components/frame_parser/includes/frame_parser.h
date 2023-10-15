@@ -32,23 +32,28 @@ enum frame_event_id { DATA_FRAME, MGMT_FRAME, CTRL_FRAME };
 enum arma_atk_notify_status_event_id { ATK_STATS_EVENT_ID };
 
 /*
- * @brief Used by pmkid_notify_armament() as part of event data to
- * differentiate between PMKID and MIC based attack
+ * @brief Used by pmkid_notify_armament() and mic_notify_armament() as part of
+ * event data to differentiate between PMKID and MIC based attack
  */
 enum arma_atk_notify_context { PMKID_BASED, MIC_BASED };
 
 /*
- * @brief Used by pmkid_notify_armament() as an event data to notify
- * about the status of the attack, it contains uint8_t atk_context which can be
- * either PMKID_BASED or MIC_BASED
+ * @brief Event data to notify about the status of the attack, it contains
+ * atk_context, which can be either PMKID_BASED or MIC_BASED
+ * message_number, first message or second message
+ * bssid, mac address of access point
+ * station_mac, mac address of station
  */
 typedef struct {
   uint8_t atk_context;
+  uint8_t message_number;
+  uint8_t bssid[6];
+  uint8_t station_mac[6];
 } arma_atk_event_data_t;
 
 /*
- * @brief Notifies armament about the status of the attack by posting an event
- * to the event loop
+ * @brief Notifies armament about the status of the PMKID attack by posting an
+ * event to the event loop
  */
 void pmkid_notify_armament();
 
@@ -64,7 +69,20 @@ void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
                  key_information_t *key_info);
 
 /*
- * TODO: Complete the functionality for MIC based attack
+ * @brief Notifies armament about the status of the MIC attack by posting an
+ * event to the event loop
+ */
+void mic_notify_armament(uint8_t message_number, mac_header_t *mac_header);
+
+/*
+ * @brief Parses the MIC and check if valid. If valid, it outputs the
+ * anonce, bssid and station mac from first eapol message. Then it outputs
+ * the authentication data from second eapol message. The armament gets
+ * notified by each messages
+ * @param *wpa_data wpa data in the eapol frame
+ * @param *eapol_frame eapol frame which contains wpa data
+ * @param *key_info information about the key to determine if it is a
+ * message 1 or 2 from 4 way handshake
  */
 void parse_mic(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
                key_information_t *key_info);

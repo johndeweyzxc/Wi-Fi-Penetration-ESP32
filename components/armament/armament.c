@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "arma_mic.h"
 #include "arma_pmkid.h"
 #include "arma_reconnaissance.h"
 #include "arma_utils.h"
@@ -37,7 +38,7 @@ static void armament_activate(void *args, esp_event_base_t event_base,
   } else if (memcmp(arma_selected, PMKID, 2) == 0) {
     arma_pmkid(target_bssid);
   } else if (memcmp(arma_selected, MIC, 2) == 0) {
-    // TODO: Attack method is mic
+    arma_mic(target_bssid);
   } else if (memcmp(arma_selected, DEAUTH, 2) == 0) {
     // TODO: Deauth a client
   }

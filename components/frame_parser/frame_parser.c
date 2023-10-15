@@ -14,6 +14,7 @@
 #include "esp_err.h"
 #include "esp_event.h"
 #include "esp_wifi_types.h"
+#include "frame_constants.h"
 #include "frame_output.h"
 
 ESP_EVENT_DEFINE_BASE(FRAME_RECEIVED_EVENT_BASE);
@@ -46,11 +47,32 @@ void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
   }
 }
 
+void mic_notify_armament(uint8_t message_number, mac_header_t *mac_header) {
+  printf("frame_parser.mic_notify_armament > *\n");
+  arma_atk_event_data_t event_data;
+
+  event_data.atk_context = MIC_BASED;
+  event_data.message_number = message_number;
+  memcpy(event_data.bssid, mac_header->bssid, 6);
+  if (message_number == 1) {
+    memcpy(event_data.station_mac, mac_header->receiver_addr, 6);
+  } else if (message_number == 2) {
+    memcpy(event_data.station_mac, mac_header->transmitter_addr, 6);
+  }
+
+  ESP_ERROR_CHECK(esp_event_post(ARMAMENT_ATTACK_STATUS_EVENT_BASE,
+                                 ATK_STATS_EVENT_ID, &event_data,
+                                 sizeof(event_data), portMAX_DELAY));
+}
+
 void parse_mic(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
                key_information_t *key_info) {
+  mac_header_t *mac_header = &eapol_frame->mac_header;
+
   if (key_info->key_type == 1 && key_info->key_ack == 1 &&
       key_info->install == 0) {
     output_anonce_from_message_1(eapol_frame);
+    mic_notify_armament(1, mac_header);
   } else {
     printf("frame_parser.parse_mic > This is not msg 1\n");
   }
@@ -58,6 +80,7 @@ void parse_mic(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
   if (key_info->key_type == 1 && key_info->key_mic == 1 &&
       key_info->secure == 0) {
     output_mic_from_message_2(eapol_frame);
+    mic_notify_armament(2, mac_header);
   } else {
     printf("frame_parser.parse_mic > This is not msg 2\n");
   }

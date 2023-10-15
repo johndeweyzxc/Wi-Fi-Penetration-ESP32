@@ -35,12 +35,17 @@ enum arma_atk_notify_status_event_id { ATK_STATS_EVENT_ID };
 enum arma_atk_notify_context { PMKID_BASED, MIC_BASED };
 
 /*
- * @brief Used by pmkid_attack_notify_armament() as an event data to notify
- * about the status of the attack, it contains uint8_t atk_context which can be
- * either PMKID_BASED or MIC_BASED
+ * @brief Event data to notify about the status of the attack, it contains
+ * atk_context, which can be either PMKID_BASED or MIC_BASED
+ * message_number, first message or second message
+ * bssid, mac address of access point
+ * station_mac, mac address of station
  */
 typedef struct {
   uint8_t atk_context;
+  uint8_t message_number;
+  uint8_t bssid[6];
+  uint8_t station_mac[6];
 } arma_atk_event_data_t;
 
 /*

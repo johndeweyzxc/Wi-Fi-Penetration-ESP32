@@ -42,10 +42,9 @@ void arma_delete_task_pmkid_sniff_duration();
 
 /*
  * @brief This function is invoke when the PMKID attack finishes, it clears the
- * target parameter in frame parser, unregisters event data frame handler in
- * frame parser, unregisters event handler pmkid_notif() for handling
- * PMKID attack notification, stops wifi promiscuous mode and finally it
- * disconnects from the access point
+ * target parameter, unregisters event data frame handler in
+ * frame parser. Then it unregisters event handler pmkid_notif(), stops wifi
+ * promiscuous mode and finally it disconnects from the access point
  * @param from_sniff_task determines if the invoker of this function is coming
  * from the arma_pmkid_sniff_duration(), if it is then there is no need to
  * invoke arma_delete_task_pmkid_sniff_duration() since the deletion of task
@@ -64,12 +63,12 @@ void arma_pmkid_finishing_sequence(uint8_t from_sniff_task);
 void arma_pmkid_sniff_duration();
 
 /*
- * @brief Launches the PMKID attack sequence, it sets the target parameter in
- * frame parser, registers event data frame handler in frame parser, registers
- * event handler pmkid_notif() for handling PMKID attack notification,
- * starts wifi promiscuous mode, sets the wifi filter to data, sets the channel
- * where the access point is located, connects to the access point and finally
- * it creates the task arma_delete_task_pmkid_sniff_duration()
+ * @brief Launches the PMKID attack sequence by setting the target parameter and
+ * registering event data frame handler in frame parser. Then it registers event
+ * handler pmkid_notif() for handling PMKID attack notification. It starts wifi
+ * promiscuous mode, sets the wifi filter to data and sets the channel of wifi
+ * based on what the access point uses then it connects to the access point and
+ * finally it creates the task arma_delete_task_pmkid_sniff_duration()
  * @param *ssid_name name of access point
  * @param ssid_len length of the ssid name
  * @param channel channel of the access point, the channel is can be either
@@ -83,16 +82,6 @@ void arma_pmkid_launching_sequence(uint8_t *ssid_name, uint8_t ssid_len,
  * point
  */
 uint8_t calc_len_ssid_name(uint8_t *ssid_name);
-
-/*
- * @brief Utility function for appending two string
- */
-char *string_append(char *s1, char *s2);
-
-/*
- * @brief Utility function for converting hex string to unsigned 8 bit integer
- */
-uint8_t convert_to_uint8_t(char s1, char s2);
 
 /*
  * @brief Starts the PMKID attack by first scanning nearby access point and if
