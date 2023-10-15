@@ -64,7 +64,7 @@ void wifi_connect_to_ap(uint8_t *ssid_name, uint8_t ssid_length,
 
 void wifi_disconnect_from_ap(uint8_t *bssid) {
   ESP_ERROR_CHECK(esp_wifi_disconnect());
-  printf("wifi_ctl.wifi_disconnect_from_ap > %02X:%02X:%02X:%02X:%02X:%02X\n",
+  printf("wifi_ctl.wifi_disconnect_from_ap > %02X%02X%02X%02X%02X%02X\n",
          bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
 }
 
@@ -95,7 +95,12 @@ void wifi_set_filter(uint8_t filter_type) {
   esp_wifi_set_promiscuous_filter(&filter);
 }
 
-static void received_frame(void *buf, wifi_promiscuous_pkt_type_t type) {
+/*
+ * @brief Callback function when a frame is received in promiscuous mode
+ * @param *buf pointer to the frame
+ * @param type type of frame (Management, Control, Data or Misc)
+ */
+void received_frame(void *buf, wifi_promiscuous_pkt_type_t type) {
   wifi_promiscuous_pkt_t *frame = (wifi_promiscuous_pkt_t *)buf;
 
   uint8_t event_id;

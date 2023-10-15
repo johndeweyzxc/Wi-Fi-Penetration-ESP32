@@ -23,8 +23,8 @@ ESP_EVENT_DECLARE_BASE(ARMAMENT_ATTACK_STATUS_EVENT_BASE);
 static TaskHandle_t pmkid_sniff_task_handle = NULL;
 static uint8_t int_target_bssid[6];
 
-static void pmkid_notif(void *args, esp_event_base_t event_base,
-                        int32_t event_id, void *event_data) {
+void pmkid_notif(void *args, esp_event_base_t event_base, int32_t event_id,
+                 void *event_data) {
   arma_atk_event_data_t *notification_data;
   notification_data = (arma_atk_event_data_t *)event_data;
 
@@ -55,6 +55,7 @@ void arma_delete_task_pmkid_sniff_duration() {
 }
 
 void arma_pmkid_finishing_sequence(uint8_t from_sniff_task) {
+  printf("arma_pmkid.arma_pmkid_finishing_sequence > Finishing sequence\n");
   frame_parser_clear_target_parameter();
   frame_parser_unregister_data_frame_handler();
   arma_pmkid_notif_event_unregister();
@@ -80,6 +81,7 @@ void arma_pmkid_sniff_duration() {
 
 void arma_pmkid_launching_sequence(uint8_t *ssid_name, uint8_t ssid_len,
                                    uint8_t channel) {
+  printf("arma_pmkid.arma_pmkid_launching_sequence > Launching sequence\n");
   frame_parser_set_target_parameter(int_target_bssid, PARSE_PMKID);
   frame_parser_register_data_frame_handler();
   arma_pmkid_notif_event_register();
@@ -101,41 +103,11 @@ uint8_t calc_len_ssid_name(uint8_t *ssid_name) {
       length++;
     }
   }
-  if (length > 33) {
-    printf("arma_pmkid.calc_len_ssid_name > Length of SSID is %u\n", length);
-    return 0;
-  } else if (length == 0) {
+  if (length == 0) {
     printf("arma_pmkid.calc_len_ssid_name > Length of SSID is 0\n");
     return 0;
   }
   return length;
-}
-
-char *string_append(char *s1, char *s2) {
-  int s1_length = strlen(s1);
-  int s2_length = strlen(s2);
-  int size = s1_length + s2_length;
-  char *s = calloc(size, sizeof(char));
-
-  for (int i = 0; i < s1_length; i++) {
-    s[i] = s1[i];
-  }
-  for (int i = 0; i < s2_length; i++) {
-    s[s1_length + i] = s2[i];
-  }
-  return s;
-}
-
-uint8_t convert_to_uint8_t(char s1, char s2) {
-  char *s;
-  uint8_t uint8_bit;
-  if (s1 == '\0' || s2 == '\0') return 0;
-  char s1a[] = {s1, '\0'};
-  char s2a[] = {s2, '\0'};
-  s = string_append(s1a, s2a);
-  uint8_bit = strtol(s, NULL, 16);
-  free(s);
-  return uint8_bit;
 }
 
 void arma_pmkid(char *target_bssid) {

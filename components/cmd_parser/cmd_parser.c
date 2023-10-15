@@ -41,8 +41,9 @@ void set_arma_and_target(char *user_in_buff, char *arma_selected,
 
   user_in_buff += 2;
   memcpy(target_bssid, user_in_buff, 12);
-  printf("cmd_parser.set_arma_and_target > Set target bssid: %s\n",
-         target_bssid);
+  printf("cmd_parser.set_arma_and_target > Target: %02X%02X%02X%02X%02X%02X\n",
+         target_bssid[0], target_bssid[1], target_bssid[2], target_bssid[3],
+         target_bssid[4], target_bssid[5]);
 }
 
 void set_arma_selected(char *user_in_buff, char *arma_selected) {

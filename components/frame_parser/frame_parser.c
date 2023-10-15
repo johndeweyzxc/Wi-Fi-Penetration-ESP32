@@ -117,8 +117,8 @@ void parse_80211_authentication(eapol_auth_data_t *wpa_data,
   }
 }
 
-static void data_frame_parser(void *args, esp_event_base_t event_base,
-                              int32_t event_id, void *event_data) {
+void data_frame_parser(void *args, esp_event_base_t event_base,
+                       int32_t event_id, void *event_data) {
   wifi_promiscuous_pkt_t *frame = (wifi_promiscuous_pkt_t *)event_data;
   eapol_frame_t *eapol_frame = (eapol_frame_t *)frame->payload;
   frame_control_t *frame_control = &eapol_frame->frame_control;

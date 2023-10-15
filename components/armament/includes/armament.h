@@ -42,8 +42,8 @@ typedef struct {
  * @brief Callback function that arma_cmd_event_register() registers for
  * handling the activation of armament
  */
-static void armament_activate(void *args, esp_event_base_t event_base,
-                              int32_t event_id, void *event_data);
+void armament_activate(void *args, esp_event_base_t event_base,
+                       int32_t event_id, void *event_data);
 
 /*
  * @brief Registers event handler for handling armament activation, it uses

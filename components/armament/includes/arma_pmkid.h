@@ -20,8 +20,8 @@
  * @brief Callback function for handling PMKID attack notification sent by frame
  * parser
  */
-static void pmkid_notif(void *args, esp_event_base_t event_base,
-                        int32_t event_id, void *event_data);
+void pmkid_notif(void *args, esp_event_base_t event_base, int32_t event_id,
+                 void *event_data);
 
 /*
  * @brief Registers event handler for handling PMKID attack notification, the

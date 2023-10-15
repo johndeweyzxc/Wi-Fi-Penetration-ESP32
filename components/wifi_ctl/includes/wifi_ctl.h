@@ -81,7 +81,7 @@ void wifi_set_filter(uint8_t filter_type);
  * @param *buf pointer to the frame
  * @param type type of frame (Management, Control, Data or Misc)
  */
-static void received_frame(void *buf, wifi_promiscuous_pkt_type_t type);
+void received_frame(void *buf, wifi_promiscuous_pkt_type_t type);
 
 /*
  * @brief Starts promiscuous mode or monitor mode

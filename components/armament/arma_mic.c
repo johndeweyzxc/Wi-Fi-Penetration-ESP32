@@ -18,8 +18,8 @@ static TaskHandle_t mic_sniff_task_handle = NULL;
 static uint8_t current_eapol_message_number = 0;
 static uint8_t current_eapol_station_mac[6];
 
-static void mic_notif(void *args, esp_event_base_t event_base, int32_t event_id,
-                      void *event_data) {
+void mic_notif(void *args, esp_event_base_t event_base, int32_t event_id,
+               void *event_data) {
   arma_atk_event_data_t *notification_data;
   notification_data = (arma_atk_event_data_t *)event_data;
   printf("arma_mic.mic_notif > Received notification\n");

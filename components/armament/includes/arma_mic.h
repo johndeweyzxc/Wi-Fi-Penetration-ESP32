@@ -1,3 +1,9 @@
+/*
+ * @file arma_mic.h
+ * @author johndeweyzxc (johndewey02003@gmail.com)
+ * @brief Declaration of methods for orchestrating the MIC attack
+ */
+
 #pragma once
 
 #include "esp_event.h"
@@ -12,8 +18,8 @@
  * @brief Callback function for handling MIC attack notification sent by frame
  * parser
  */
-static void mic_notif(void *args, esp_event_base_t event_base, int32_t event_id,
-                      void *event_data);
+void mic_notif(void *args, esp_event_base_t event_base, int32_t event_id,
+               void *event_data);
 
 /*
  * @brief Registers event handler for handling MIC attack notification, the

@@ -109,8 +109,8 @@ void parse_80211_authentication(eapol_auth_data_t *wpa_data,
  * @brief Callback function for handling frame of type data when promiscuous
  * mode or monitor mode is turned on
  */
-static void data_frame_parser(void *args, esp_event_base_t event_base,
-                              int32_t event_id, void *event_data);
+void data_frame_parser(void *args, esp_event_base_t event_base,
+                       int32_t event_id, void *event_data);
 
 /*
  * @brief Unregisters event handler data_frame_parser() which handles incoming

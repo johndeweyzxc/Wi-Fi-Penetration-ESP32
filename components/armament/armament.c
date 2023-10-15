@@ -20,8 +20,8 @@ ESP_EVENT_DEFINE_BASE(ARMAMENT_CMD_EVENT_BASE);
 static uint8_t wifi_init_status = WIFI_NOT_INITIALIZED;
 
 // TODO: Implement a function to deactivate armament
-static void armament_activate(void *args, esp_event_base_t event_base,
-                              int32_t event_id, void *event_data) {
+void armament_activate(void *args, esp_event_base_t event_base,
+                       int32_t event_id, void *event_data) {
   armament_cmd_event_data *cmd_event_data;
   cmd_event_data = (armament_cmd_event_data *)event_data;
 
