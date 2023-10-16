@@ -73,11 +73,12 @@ void output_pmkid(eapol_frame_t *message_1) {
 
   char m1_buffer[50];
   char *p_m1_buffer = m1_buffer;
+
+  // Transmitter address (Access point mac address)
+  put_mac_addr_in_buff(p_m1_buffer, mac_header->transmitter_addr);
+  p_m1_buffer += 13;
   // Receiver address (Station mac address)
   put_mac_addr_in_buff(p_m1_buffer, mac_header->receiver_addr);
-  p_m1_buffer += 13;
-  // BSSID (Access point mac address)
-  put_mac_addr_in_buff(p_m1_buffer, mac_header->bssid);
   p_m1_buffer += 13;
   // PMKID (Pairwise Master Key Identifier)
   put_key_in_buff(p_m1_buffer, key_data->pmkid);
@@ -91,11 +92,11 @@ void output_anonce_from_message_1(eapol_frame_t *message_1) {
   char m1_buffer[91 + 20];
   char *p_m1_buffer = m1_buffer;
 
+  // Transmitter address (Access point mac address)
+  put_mac_addr_in_buff(p_m1_buffer, mac_header_message_1->transmitter_addr);
+  p_m1_buffer += 13;
   // Receiver address (Station mac address)
   put_mac_addr_in_buff(p_m1_buffer, mac_header_message_1->receiver_addr);
-  p_m1_buffer += 13;
-  // BSSID (Access point mac address)
-  put_mac_addr_in_buff(p_m1_buffer, mac_header_message_1->bssid);
   p_m1_buffer += 13;
   // Anonce (Access point nonce)
   put_nonce_in_buff(p_m1_buffer, auth_message_1->wpa_key_nonce);
@@ -113,8 +114,8 @@ void output_mic_from_message_2(eapol_frame_t *message_2) {
   // Transmitter address (Station mac address)
   put_mac_addr_in_buff(p_m2_buffer, mac_header_message_2->transmitter_addr);
   p_m2_buffer += 13;
-  // BSSID (Access point mac address)
-  put_mac_addr_in_buff(p_m2_buffer, mac_header_message_2->bssid);
+  // Receiver address (Access point mac address)
+  put_mac_addr_in_buff(p_m2_buffer, mac_header_message_2->receiver_addr);
   p_m2_buffer += 13;
   // Version, Type, Length and Key Description Type
   put_m2_info_in_buff(p_m2_buffer, auth_message_2);
@@ -125,7 +126,7 @@ void output_mic_from_message_2(eapol_frame_t *message_2) {
   // MIC (Message Integrity Check)
   put_key_in_buff(p_m2_buffer, auth_message_2->wpa_key_mic);
   p_m2_buffer += 33;
-  // Key data
+  // WPA Key data
   put_key_data_in_buff(p_m2_buffer, auth_message_2->wpa_key_data,
                        key_data_length);
   p_m2_buffer += (key_data_length * 2);

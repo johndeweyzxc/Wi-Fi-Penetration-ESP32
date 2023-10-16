@@ -23,7 +23,7 @@ static uint8_t *bssid = NULL;
 static uint8_t parse_type = NULL_PARSE_TYPE;
 
 static uint8_t mic_current_eapol_message_number = 0;
-static uint8_t mic_current_eapol_station_mac[6];
+static uint8_t mic_current_eapol_station_mac[6] = {0, 0, 0, 0, 0, 0};
 
 void pmkid_notify_armament() {
   printf("frame_parser.pmkid_notify_armament > *\n");
@@ -65,28 +65,28 @@ void parse_mic(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
 
   if (key_info->key_type == 1 && key_info->key_ack == 1 &&
       key_info->install == 0) {
-    // TODO: Create function for preventing the output of the same frame over
-    // and over again
-    output_anonce_from_message_1(eapol_frame);
-    // mic_notify_armament(1, mac_header);
-
     if (mic_current_eapol_message_number == 0) {
-      // TODO: Remove this memcpy function, this is unnecessary
+      output_anonce_from_message_1(eapol_frame);
       memcpy(mic_current_eapol_station_mac, mac_header->receiver_addr, 6);
       mic_current_eapol_message_number = 1;
+
+    } else if (mic_current_eapol_message_number == 1) {
+      if (memcmp(mic_current_eapol_station_mac, mac_header->receiver_addr, 6) !=
+          0) {
+        output_anonce_from_message_1(eapol_frame);
+        memcpy(mic_current_eapol_station_mac, mac_header->receiver_addr, 6);
+      }
     }
   }
 
   if (key_info->key_type == 1 && key_info->key_mic == 1 &&
       key_info->secure == 0) {
-    // TODO: Create function for preventing the output of the same frame over
-    // and over again
-    output_mic_from_message_2(eapol_frame);
-    // mic_notify_armament(2, mac_header);
-
     if (mic_current_eapol_message_number == 1) {
-      mic_current_eapol_message_number = 0;
-      mic_notify_armament();
+      if (memcmp(mic_current_eapol_station_mac, mac_header->transmitter_addr,
+                 6) == 0) {
+        output_mic_from_message_2(eapol_frame);
+        mic_notify_armament();
+      }
     }
   }
 }
@@ -170,6 +170,9 @@ void frame_parser_clear_target_parameter() {
 
 void frame_parser_set_target_parameter(uint8_t *target_bssid,
                                        uint8_t selected_parse_type) {
+  // Resets the eapol message number
+  mic_current_eapol_message_number = 0;
+
   bssid = target_bssid;
   parse_type = selected_parse_type;
   printf("frame_parser.frame_parser_set_target_parameter > *\n");
