@@ -46,9 +46,9 @@ void arma_delete_task_pmkid_sniff_duration();
  * frame parser. Then it unregisters event handler pmkid_notif(), stops wifi
  * promiscuous mode and finally it disconnects from the access point
  * @param from_sniff_task determines if the invoker of this function is coming
- * from the arma_pmkid_sniff_duration(), if it is then there is no need to
- * invoke arma_delete_task_pmkid_sniff_duration() since the deletion of task
- * arma_pmkid_sniff_duration() happens inside arma_pmkid_sniff_duration()
+ * from the arma_pmkid_sniff_duration() (input of 1), if it is then there is no
+ * need to invoke arma_delete_task_pmkid_sniff_duration() since the deletion of
+ * task arma_pmkid_sniff_duration() happens inside arma_pmkid_sniff_duration()
  */
 void arma_pmkid_finishing_sequence(uint8_t from_sniff_task);
 

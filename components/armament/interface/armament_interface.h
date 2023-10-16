@@ -25,6 +25,7 @@
 enum armament_event { CMD_EVENT };
 
 typedef struct {
+  uint8_t armament_activate;
   char *arma_selected;
   char *target_bssid;
 } armament_cmd_event_data;

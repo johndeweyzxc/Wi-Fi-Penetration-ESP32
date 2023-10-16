@@ -44,9 +44,9 @@ void arma_delete_task_mic_sniff_duration();
  * frame parser. Then it unregisters event handler mic_notif() and finally it
  * stops wifi promiscuous mode
  * @param from_sniff_task determines if the invoker of this function is coming
- * from the arma_mic_sniff_duration(), if it is then there is no need to
- * invoke arma_delete_task_mic_sniff_duration() since the deletion of task
- * arma_mic_sniff_duration() happens inside arma_mic_sniff_duration()
+ * from the arma_mic_sniff_duration() (input of 1), if it is then there is no
+ * need to invoke arma_delete_task_mic_sniff_duration() since the deletion of
+ * task arma_mic_sniff_duration() happens inside arma_mic_sniff_duration()
  */
 void arma_mic_finishing_sequence(uint8_t from_sniff_task);
 

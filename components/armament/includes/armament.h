@@ -34,6 +34,7 @@ enum armament_event { CMD_EVENT };
  * the selected armament and the target bssid
  */
 typedef struct {
+  uint8_t armament_activate;
   char *arma_selected;
   char *target_bssid;
 } armament_cmd_event_data;
@@ -42,8 +43,8 @@ typedef struct {
  * @brief Callback function that arma_cmd_event_register() registers for
  * handling the activation of armament
  */
-void armament_activate(void *args, esp_event_base_t event_base,
-                       int32_t event_id, void *event_data);
+void armament_activate_or_deactivate(void *args, esp_event_base_t event_base,
+                                     int32_t event_id, void *event_data);
 
 /*
  * @brief Registers event handler for handling armament activation, it uses

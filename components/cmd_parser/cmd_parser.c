@@ -71,6 +71,7 @@ void cmd_ctrl_input_activate(char *user_in_buff, char *arma_selected,
   printf("cmd_parser.cmd_ctrl_input_activate > Armament activate!\n");
 
   armament_cmd_event_data cmd_event_data = {
+      .armament_activate = 1,
       .arma_selected = arma_selected,
       .target_bssid = target_bssid,
   };
@@ -78,12 +79,21 @@ void cmd_ctrl_input_activate(char *user_in_buff, char *arma_selected,
   ESP_ERROR_CHECK(esp_event_post(ARMAMENT_CMD_EVENT_BASE, CMD_EVENT,
                                  &cmd_event_data, event_data_size,
                                  portMAX_DELAY));
+
   clear_user_in_buff(user_in_buff);
 }
 
 void cmd_ctl_input_deactivate(char *user_in_buff, char *arma_selected,
                               char *target_bssid) {
-  // TODO: Create functionality that halts all operation in the armament
+  armament_cmd_event_data cmd_event_data = {
+      .armament_activate = 0,
+      .arma_selected = arma_selected,
+  };
+
+  size_t event_data_size = sizeof(cmd_event_data);
+  ESP_ERROR_CHECK(esp_event_post(ARMAMENT_CMD_EVENT_BASE, CMD_EVENT,
+                                 &cmd_event_data, event_data_size,
+                                 portMAX_DELAY));
 
   clear_user_in_buff(user_in_buff);
   clear_arma_and_bssid_buff(arma_selected, target_bssid);
