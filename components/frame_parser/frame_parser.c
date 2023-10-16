@@ -22,8 +22,10 @@ ESP_EVENT_DEFINE_BASE(ARMAMENT_ATTACK_STATUS_EVENT_BASE);
 static uint8_t *bssid = NULL;
 static uint8_t parse_type = NULL_PARSE_TYPE;
 
-static uint8_t mic_current_eapol_message_number = 0;
-static uint8_t mic_current_eapol_station_mac[6] = {0, 0, 0, 0, 0, 0};
+// For MIC parsing, current eapol message number
+static uint8_t curr_eapol_m_num = 0;
+// For MIC parsing, current eapol station mac address
+static uint8_t curr_eapol_sta_mac[6] = {0, 0, 0, 0, 0, 0};
 
 void pmkid_notify_armament() {
   printf("frame_parser.pmkid_notify_armament > *\n");
@@ -53,10 +55,32 @@ void mic_notify_armament() {
   arma_atk_event_data_t event_data;
   event_data.atk_context = MIC_BASED;
 
-  // TODO: Fix a bug that cause the system to crash
   ESP_ERROR_CHECK(esp_event_post(ARMAMENT_ATTACK_STATUS_EVENT_BASE,
                                  ATK_STATS_EVENT_ID, &event_data,
                                  sizeof(event_data), portMAX_DELAY));
+}
+
+void parse_anonce_message_1(mac_header_t *mac_header, eapol_frame_t *msg_1) {
+  if (curr_eapol_m_num == 0) {
+    output_anonce_from_message_1(msg_1);
+    memcpy(curr_eapol_sta_mac, mac_header->receiver_addr, 6);
+    curr_eapol_m_num = 1;
+
+  } else if (curr_eapol_m_num == 1) {
+    if (memcmp(curr_eapol_sta_mac, mac_header->receiver_addr, 6) != 0) {
+      output_anonce_from_message_1(msg_1);
+      memcpy(curr_eapol_sta_mac, mac_header->receiver_addr, 6);
+    }
+  }
+}
+
+void parse_mic_message_2(mac_header_t *mac_header, eapol_frame_t *msg_2) {
+  if (curr_eapol_m_num == 1) {
+    if (memcmp(curr_eapol_sta_mac, mac_header->transmitter_addr, 6) == 0) {
+      output_mic_from_message_2(msg_2);
+      mic_notify_armament();
+    }
+  }
 }
 
 void parse_mic(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
@@ -65,29 +89,12 @@ void parse_mic(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
 
   if (key_info->key_type == 1 && key_info->key_ack == 1 &&
       key_info->install == 0) {
-    if (mic_current_eapol_message_number == 0) {
-      output_anonce_from_message_1(eapol_frame);
-      memcpy(mic_current_eapol_station_mac, mac_header->receiver_addr, 6);
-      mic_current_eapol_message_number = 1;
-
-    } else if (mic_current_eapol_message_number == 1) {
-      if (memcmp(mic_current_eapol_station_mac, mac_header->receiver_addr, 6) !=
-          0) {
-        output_anonce_from_message_1(eapol_frame);
-        memcpy(mic_current_eapol_station_mac, mac_header->receiver_addr, 6);
-      }
-    }
+    parse_anonce_message_1(mac_header, eapol_frame);
   }
 
   if (key_info->key_type == 1 && key_info->key_mic == 1 &&
       key_info->secure == 0) {
-    if (mic_current_eapol_message_number == 1) {
-      if (memcmp(mic_current_eapol_station_mac, mac_header->transmitter_addr,
-                 6) == 0) {
-        output_mic_from_message_2(eapol_frame);
-        mic_notify_armament();
-      }
-    }
+    parse_mic_message_2(mac_header, eapol_frame);
   }
 }
 
@@ -171,7 +178,7 @@ void frame_parser_clear_target_parameter() {
 void frame_parser_set_target_parameter(uint8_t *target_bssid,
                                        uint8_t selected_parse_type) {
   // Resets the eapol message number
-  mic_current_eapol_message_number = 0;
+  curr_eapol_m_num = 0;
 
   bssid = target_bssid;
   parse_type = selected_parse_type;

@@ -53,11 +53,45 @@ void set_arma_selected(char *user_in_buff, char *arma_selected);
 void output_arma_status(char *arma_selected, char *target_bssid);
 
 /*
+ * @brief Activates the armament by posting an event and clears the user_in_buff
+ * buffer
+ * @param *user_in_buff The raw buffer for storing user input
+ * @param *arma_selected The buffer where the selected armament is stored
+ * @param *target_bssid The buffer where the mac address of the target BSSID is
+ * stored
+ */
+void cmd_ctrl_input_activate(char *user_in_buff, char *arma_selected,
+                             char *target_bssid);
+
+/*
+ * @brief Deactivates the armament by clearing the user_in_buff, arma_selected
+ * and the target_bssid buffer
+ * @param *user_in_buff The raw buffer for storing user input
+ * @param *arma_selected The buffer where the selected armament is stored
+ * @param *target_bssid The buffer where the mac address of the target BSSID is
+ * stored
+ */
+void cmd_ctl_input_deactivate(char *user_in_buff, char *arma_selected,
+                              char *target_bssid);
+
+/*
+ * @brief Processes the instruction codes received via serial input by copying
+ * the instruction codes from user_in_buff buffer to arma_selected or
+ * target_bssid then it clears the user_in_buff buffer
+ * @param *user_in_buff Where the raw instruction codes is stored
+ * @param *arma_selected The buffer to store the armament code
+ * @param *target_bssid The buffer to store the mac address of the target BSSID
+ */
+void cmd_instruction_input(char *user_in_buff, char *arma_selected,
+                           char *target_bssid);
+
+/*
  * @brief Task that continually scans user command input
  */
 void cmd_parser();
 
 /*
- * @brief Creates and configures the user command input scanner task
+ * @brief Creates and configures the user command input scanner task. It also
+ * registers the input command handler for armament
  */
 void cmd_parser_create_task();

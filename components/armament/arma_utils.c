@@ -40,24 +40,7 @@ uint8_t convert_to_uint8_t(char s1, char s2) {
 
 void output_ap_info(wifi_ap_record_t *ap_record) {
   uint8_t *bssid = ap_record->bssid;
-  char output_buffer[100];
-  char *p_output_buffer = output_buffer;
-
-  sprintf(p_output_buffer, "%02X%02X%02X%02X%02X%02X,", bssid[0], bssid[1],
-          bssid[2], bssid[3], bssid[4], bssid[5]);
-
-  p_output_buffer += 13;
-  for (uint8_t i = 0; i < 33; i++) {
-    if (ap_record->ssid[i] == 0) {
-      break;
-    } else {
-      sprintf(p_output_buffer, "%02X", ap_record->ssid[i]);
-      p_output_buffer += 2;
-    }
-  }
-  sprintf(p_output_buffer, ",%02X", (uint8_t)ap_record->rssi);
-  p_output_buffer += 3;
-  sprintf(p_output_buffer, ",%02X,", (uint8_t)ap_record->primary);
-
-  printf("{SCAN,%s}\n", output_buffer);
+  printf("{SCAN,%02X%02X%02X%02X%02X%02X,%s,%02X,%02X,}\n", bssid[0], bssid[1],
+         bssid[2], bssid[3], bssid[4], bssid[5], ap_record->ssid,
+         (uint8_t)ap_record->rssi, (uint8_t)ap_record->primary);
 }

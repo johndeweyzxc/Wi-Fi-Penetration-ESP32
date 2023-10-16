@@ -69,6 +69,23 @@ void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
 void mic_notify_armament();
 
 /*
+ * @brief Parses the Anonce (Access point nonce) from message 1
+ * @param *mac_header Contains the transmitter address, receiver address and
+ * BSSID
+ * @param *msg_1 First EAPOL message from 4-way handshake
+ */
+void parse_anonce_message_1(mac_header_t *mac_header, eapol_frame_t *msg_1);
+
+/*
+ * @brief Parses the Snonce (Station nonce) and other relevant information such
+ * as MIC from message 2
+ * @param *mac_header Contains the transmitter address, receiver address and
+ * BSSID
+ * @param *msg_2 Second EAPOL message from 4-way handshake
+ */
+void parse_mic_message_2(mac_header_t *mac_header, eapol_frame_t *msg_2);
+
+/*
  * @brief Parses the MIC and check if valid. If valid, it outputs the
  * anonce, bssid and station mac from first eapol message. Then it outputs
  * the authentication data from second eapol message. The armament gets
