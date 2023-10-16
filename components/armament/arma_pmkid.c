@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "arma_pmkid.h"
 #include "arma_utils.h"
 #include "esp_err.h"
 #include "esp_event.h"

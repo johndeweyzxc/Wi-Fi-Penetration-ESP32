@@ -1,3 +1,9 @@
+/*
+ * @file arma_mic.c
+ * @author johndeweyzxc (johndewey02003@gmail.com)
+ * @brief Implementation of methods for orchestrating the MIC attack
+ */
+
 #include "arma_mic.h"
 
 #include <stdio.h>

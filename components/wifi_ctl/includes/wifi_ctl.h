@@ -18,7 +18,7 @@ enum filter_type { MANAGEMENT, CTRL, DATA };
  * @brief Event id that received_frame() uses to tell frame parser the type of
  * frame
  */
-enum frame_event_id { DATA_FRAME, MGMT_FRAME, CTRL_FRAME };
+enum frame_event_id { DATA_FRAME, MGMT_FRAME, CTRL_FRAME, MISC_FRAME };
 
 /*
  * @brief Total maximum number of access points to scan

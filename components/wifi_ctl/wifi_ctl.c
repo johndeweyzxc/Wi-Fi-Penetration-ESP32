@@ -18,6 +18,7 @@
 
 ESP_EVENT_DECLARE_BASE(FRAME_RECEIVED_EVENT_BASE);
 static ap_list_from_scan_t ap_list;
+static uint8_t attempted_to_connect_ap = 0;
 
 void wifi_inject_frame(uint8_t *frame_buffer, int size) {
   frame_bypasser_inject_frame(frame_buffer, size);
@@ -48,6 +49,11 @@ void wifi_connect_to_ap(uint8_t *ssid_name, uint8_t ssid_length,
     return;
   }
 
+  if (channel < 1 || channel > 14) {
+    printf("wifi_ctl.wifi_connect_to_ap > Invalid wifi channel: %u\n", channel);
+    return;
+  }
+
   printf("wifi_ctl.wifi_connect_to_ap > %02X%02X%02X%02X%02X%02X\n", bssid[0],
          bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
   printf("wifi_ctl.wifi_connect_to_ap > SSID is: %s\n", ssid_name);
@@ -65,16 +71,23 @@ void wifi_connect_to_ap(uint8_t *ssid_name, uint8_t ssid_length,
 
   ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
   ESP_ERROR_CHECK(esp_wifi_connect());
+  attempted_to_connect_ap = 1;
 }
 
 void wifi_disconnect_from_ap(uint8_t *bssid) {
-  ESP_ERROR_CHECK(esp_wifi_disconnect());
-  printf("wifi_ctl.wifi_disconnect_from_ap > %02X%02X%02X%02X%02X%02X\n",
-         bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
+  if (attempted_to_connect_ap == 1) {
+    ESP_ERROR_CHECK(esp_wifi_disconnect());
+    printf("wifi_ctl.wifi_disconnect_from_ap > %02X%02X%02X%02X%02X%02X\n",
+           bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
+  }
+  attempted_to_connect_ap = 0;
 }
 
 void wifi_set_channel(uint8_t channel) {
-  // TODO: Check if channel is between 1 and 14
+  if (channel < 1 || channel > 14) {
+    printf("wifi_ctl.wifi_set_channel > Invalid wifi channel: %u\n", channel);
+    return;
+  }
   esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
   printf("wifi_ctl.wifi_set_channel > Wifi channel set to %u\n", channel);
 }
@@ -119,10 +132,17 @@ void received_frame(void *buf, wifi_promiscuous_pkt_type_t type) {
     case WIFI_PKT_CTRL:
       event_id = CTRL_FRAME;
       break;
+    case WIFI_PKT_MISC:
+      event_id = MISC_FRAME;
+      printf("wifi_ctl.received_frame > Got MISC frame\n");
+      break;
     default:
       printf("wifi_ctl.received_frame > Unknown frame\n");
       return;
-      // TODO: Add case statement for MISC frame type
+  }
+
+  if (event_id == MISC_FRAME) {
+    return;
   }
 
   size_t data_size = frame->rx_ctrl.sig_len + sizeof(wifi_promiscuous_pkt_t);
@@ -138,7 +158,7 @@ void wifi_sniffer_start() {
 
 void wifi_sniffer_stop() {
   esp_wifi_set_promiscuous(false);
-  printf("wifi_ctl.wifi_sniffer_start > Promiscuous mode stopped\n");
+  printf("wifi_ctl.wifi_sniffer_stop > Promiscuous mode stopped\n");
 }
 
 static void wifi_event_handler(void *event_handler_arg,
