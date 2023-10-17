@@ -20,3 +20,15 @@ void output_ap_info(wifi_ap_record_t *ap_record);
  * @param num Total found APs
  */
 void output_number_of_aps(uint16_t num);
+
+/*
+ * @brief Outputs the MIC attack status as failure
+ * @param *target_bssid mac address (6 bytes) of the target AP
+ */
+void output_failed_mic_attack(uint8_t *target_bssid);
+
+/*
+ * @brief Outputs the PMKID attack status as failure
+ * @param *target_bssid mac address (6 bytes) of the target AP
+ */
+void output_failed_pmkid_attack(uint8_t *target_bssid);

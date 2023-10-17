@@ -30,7 +30,8 @@ void mic_notif(void *args, esp_event_base_t event_base, int32_t event_id,
 
   if (notification_data->atk_context == MIC_BASED) {
     printf("arma_mic.mic_notif > Received MIC attack notification\n");
-    arma_mic_finishing_sequence(0);
+    arma_delete_task_mic_sniff_duration();
+    arma_mic_finishing_sequence();
   }
 }
 
@@ -57,7 +58,7 @@ void arma_delete_task_mic_sniff_duration() {
   }
 }
 
-void arma_mic_finishing_sequence(uint8_t from_sniff_task) {
+void arma_mic_finishing_sequence() {
   printf(
       "arma_mic.arma_mic_finishing_sequence > MIC ATTACK FINISHING SEQUENCE\n");
   frame_parser_unregister_data_frame_handler();
@@ -65,23 +66,21 @@ void arma_mic_finishing_sequence(uint8_t from_sniff_task) {
   arma_mic_notif_event_unregister();
   wifi_sniffer_stop();
   arma_deauth_finish();
-  if (from_sniff_task == 0) {
-    arma_delete_task_mic_sniff_duration();
-  }
 }
 
 void arma_mic_sniff_duration() {
   while (1) {
-    vTaskDelay(5000 / portTICK_PERIOD_MS);
+    // TODO: Deauth attack must be coordinated
+    // TODO: Include replay counter in message 2 output
+    vTaskDelay(10000 / portTICK_PERIOD_MS);
     printf(
         "arma_mic.arma_mic_sniff_duration > Failed to sniff MIC and other data "
         "from AP: %02X%02X%02X%02X%02X%02X\n",
         int_target_bssid[0], int_target_bssid[1], int_target_bssid[2],
         int_target_bssid[3], int_target_bssid[4], int_target_bssid[5]);
 
-    arma_mic_finishing_sequence(1);
-    vTaskDelete(NULL);
-    mic_sniff_task_handle = NULL;
+    arma_mic_finishing_sequence();
+    arma_delete_task_mic_sniff_duration();
   }
 }
 
