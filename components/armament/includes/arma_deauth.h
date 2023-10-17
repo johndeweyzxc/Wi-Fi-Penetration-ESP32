@@ -16,13 +16,6 @@
 
 /*
  * @brief Loads deauthentication payload into the buffer that will be injected.
- * The payload contains the following: Subtype (1 bytes), Flags (1 bytes),
- * Duration (2 bytes),
- * Receiver address (6 bytes),
- * Source address (6 bytes),
- * BSSID (6 bytes),
- * Sequence number (2 bytes),
- * Reason code (2 bytes)
  * @param *payload_buffer The buffer to store the payload
  */
 void load_deauth_payload(uint8_t *payload_buffer);
@@ -46,11 +39,13 @@ void arma_deauth_launching_sequence(uint8_t channel);
 
 /*
  * @brief Sets the target bssid by copying it into the buffer
- * @param target_bssid the buffer of the target bssid
+ * @param *target_bssid the buffer of the target bssid (6 bytes)
  */
 void arma_mic_set_target_bssid(uint8_t *target_bssid);
 
 /*
  * @brief Starts the deauth attack
+ * @param *target_bssid the buffer of the target bssid which contains
+ * hexadecimal string (12 bytes)
  */
 void arma_deauth(char *target_bssid);

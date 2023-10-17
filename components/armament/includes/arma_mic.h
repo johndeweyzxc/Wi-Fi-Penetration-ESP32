@@ -61,12 +61,7 @@ void arma_mic_finishing_sequence(uint8_t from_sniff_task);
 void arma_mic_sniff_duration();
 
 /*
- * @brief Launches the MIC attack sequence by setting the target parameter and
- * registering event data frame handler in frame parser. Then it registers event
- * handler mic_notif() for handling MIC attack notification. It starts wifi
- * promiscuous mode, sets the wifi filter to data and sets the channel of wifi
- * based on what the access point uses then it connects to the access point and
- * finally it creates the task arma_mic_sniff_duration()
+ * @brief Launches the MIC attacking sequence
  * @param *channel channel of the access point, the channel can be either
  * between 1 and 13
  */
@@ -76,6 +71,6 @@ void arma_mic_launching_sequence(uint8_t channel);
  * @brief Starts the MIC attack by first scanning nearby access point and if one
  * of those access point matched the bssid with the target bssid then it invokes
  * arma_mic_launching_sequence()
- * @param *target_bssid buffer of 6 bytes mac address of the target bssid
+ * @param *target_bssidmac address of the target bssid (6 bytes)
  */
 void arma_mic(char *target_bssid);

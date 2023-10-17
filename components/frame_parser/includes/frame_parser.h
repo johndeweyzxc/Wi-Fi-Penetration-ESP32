@@ -56,8 +56,8 @@ void pmkid_notify_armament();
  * and then it notifies the armament by invoking pmkid_notify_armament()
  * @param *wpa_data wpa data in the eapol frame
  * @param *eapol_frame eapol frame which contains wpa data
- * @param *key_info information about the key to determine if it is a message 1
- * or 2 from 4 way handshake
+ * @param *key_info information (2 bytes) about the key to determine if it is a
+ * message 1 or 2 from 4 way handshake
  */
 void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
                  key_information_t *key_info);
@@ -92,7 +92,7 @@ void parse_mic_message_2(mac_header_t *mac_header, eapol_frame_t *msg_2);
  * notified by each messages
  * @param *wpa_data wpa data in the eapol frame
  * @param *eapol_frame eapol frame which contains wpa data
- * @param *key_info information about the key to determine if it is a
+ * @param *key_info information (2 bytes) about the key to determine if it is a
  * message 1 or 2 from 4 way handshake
  */
 void parse_mic(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
@@ -101,7 +101,7 @@ void parse_mic(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
 /*
  * @brief Do a bitwise operation on key information to determine the values of
  * the attributes
- * @param *key_info_16 16 bits of key information and its attributes
+ * @param *key_info_16 key information and its attributes (2 bytes)
  * @return key information which is of type key_information_t
  */
 key_information_t perform_bitwise_on_key_info(uint16_t *key_info_16);
@@ -142,7 +142,7 @@ void frame_parser_clear_target_parameter();
 
 /*
  * @brief Sets the target mac address and the parse type
- * @param *target_bssid pointer to the 6 bytes array of mac address
+ * @param *target_bssid mac address of the target (6 bytes)
  * @param selected_parse_type data to parse, PARSE_PMKID or PARSE_MIC
  */
 void frame_parser_set_target_parameter(uint8_t *target_bssid,

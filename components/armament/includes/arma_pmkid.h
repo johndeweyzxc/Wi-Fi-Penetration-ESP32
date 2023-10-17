@@ -63,13 +63,8 @@ void arma_pmkid_finishing_sequence(uint8_t from_sniff_task);
 void arma_pmkid_sniff_duration();
 
 /*
- * @brief Launches the PMKID attack sequence by setting the target parameter and
- * registering event data frame handler in frame parser. Then it registers event
- * handler pmkid_notif() for handling PMKID attack notification. It starts wifi
- * promiscuous mode, sets the wifi filter to data and sets the channel of wifi
- * based on what the access point uses then it connects to the access point and
- * finally it creates the task arma_delete_task_pmkid_sniff_duration()
- * @param *ssid_name name of access point
+ * @brief Launches the PMKID attacking sequence
+ * @param *ssid_name name of access point (1 to 32 characters)
  * @param ssid_len length of the ssid name
  * @param channel channel of the access point, the channel is can be either
  * between 1 and 13
@@ -80,6 +75,7 @@ void arma_pmkid_launching_sequence(uint8_t *ssid_name, uint8_t ssid_len,
 /*
  * @brief Utility function for calculating the length of the name of access
  * point
+ * @param *ssid_name name of access point (1 to 32 characters)
  */
 uint8_t calc_len_ssid_name(uint8_t *ssid_name);
 
@@ -87,6 +83,6 @@ uint8_t calc_len_ssid_name(uint8_t *ssid_name);
  * @brief Starts the PMKID attack by first scanning nearby access point and if
  * one of those access point matched the bssid with the target bssid then it
  * invokes the arma_pmkid_launching_sequence()
- * @param *target_bssid buffer of 6 bytes mac address of the target bssid
+ * @param *target_bssid mac address of the target bssid (6 bytes)
  */
 void arma_pmkid(char *target_bssid);

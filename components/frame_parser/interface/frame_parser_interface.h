@@ -64,7 +64,7 @@ void frame_parser_clear_target_parameter();
 
 /*
  * @brief Sets the target mac address and the parse type
- * @param *target_bssid pointer to the 6 bytes array of mac address
+ * @param *target_bssid mac address of the target (6 bytes)
  * @param selected_parse_type data to parse, PARSE_PMKID or PARSE_MIC
  */
 void frame_parser_set_target_parameter(uint8_t *target_bssid,

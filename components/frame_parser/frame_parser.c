@@ -10,11 +10,11 @@
 
 #include "arpa/inet.h"
 #include "eapol_frame.h"
-#include "eapol_validator.h"
 #include "esp_err.h"
 #include "esp_event.h"
 #include "esp_wifi_types.h"
 #include "frame_constants.h"
+#include "frame_eapol_validator.h"
 #include "frame_output.h"
 
 ESP_EVENT_DEFINE_BASE(FRAME_RECEIVED_EVENT_BASE);
@@ -26,9 +26,13 @@ static uint8_t parse_type = NULL_PARSE_TYPE;
 static uint8_t curr_eapol_m_num = 0;
 // For MIC parsing, current eapol station mac address
 static uint8_t curr_eapol_sta_mac[6] = {0, 0, 0, 0, 0, 0};
+// For MIC parsing, flag if message 2 is received
+static uint8_t received_eapol_message_2 = 0;
 
 void pmkid_notify_armament() {
-  printf("frame_parser.pmkid_notify_armament > *\n");
+  printf(
+      "frame_parser.pmkid_notify_armament > Message 1 contains PMKID, "
+      "notifying armament\n");
   arma_atk_event_data_t event_data;
   event_data.atk_context = PMKID_BASED;
   ESP_ERROR_CHECK(esp_event_post(ARMAMENT_ATTACK_STATUS_EVENT_BASE,
@@ -51,7 +55,9 @@ void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
 }
 
 void mic_notify_armament() {
-  printf("frame_parser.mic_notify_armament > *\n");
+  printf(
+      "frame_parser.mic_notify_armament > Message 2 contains MIC, notifying "
+      "armament\n");
   arma_atk_event_data_t event_data;
   event_data.atk_context = MIC_BASED;
 
@@ -76,7 +82,12 @@ void parse_anonce_message_1(mac_header_t *mac_header, eapol_frame_t *msg_1) {
 
 void parse_mic_message_2(mac_header_t *mac_header, eapol_frame_t *msg_2) {
   if (curr_eapol_m_num == 1) {
+    if (received_eapol_message_2 == 1) {
+      return;
+    }
+
     if (memcmp(curr_eapol_sta_mac, mac_header->transmitter_addr, 6) == 0) {
+      received_eapol_message_2 = 1;
       output_mic_from_message_2(msg_2);
       mic_notify_armament();
     }
@@ -160,27 +171,37 @@ void data_frame_parser(void *args, esp_event_base_t event_base,
 void frame_parser_unregister_data_frame_handler() {
   ESP_ERROR_CHECK(esp_event_handler_unregister(FRAME_RECEIVED_EVENT_BASE,
                                                DATA_FRAME, &data_frame_parser));
-  printf("frame_parser.frame_parser_unregister_data_frame_handler > *\n");
+  printf(
+      "frame_parser.frame_parser_unregister_data_frame_handler > Unregistered "
+      "event handler for data frames\n");
 }
 
 void frame_parser_register_data_frame_handler() {
   ESP_ERROR_CHECK(esp_event_handler_register(
       FRAME_RECEIVED_EVENT_BASE, DATA_FRAME, &data_frame_parser, NULL));
-  printf("frame_parser.frame_parser_register_data_frame_handler > *\n");
+  printf(
+      "frame_parser.frame_parser_register_data_frame_handler > Registered "
+      "event handler for data frames\n");
 }
 
 void frame_parser_clear_target_parameter() {
   bssid = NULL;
   parse_type = NULL_PARSE_TYPE;
-  printf("frame_parser.frame_parser_clear_target_parameter > *\n");
+  printf(
+      "frame_parser.frame_parser_clear_target_parameter > Cleared target "
+      "parameter in frame parser\n");
 }
 
 void frame_parser_set_target_parameter(uint8_t *target_bssid,
                                        uint8_t selected_parse_type) {
   // Resets the eapol message number
   curr_eapol_m_num = 0;
+  // Resets the flag for checking if message 2 is received
+  received_eapol_message_2 = 0;
 
   bssid = target_bssid;
   parse_type = selected_parse_type;
-  printf("frame_parser.frame_parser_set_target_parameter > *\n");
+  printf(
+      "frame_parser.frame_parser_set_target_parameter > Target set in "
+      "frame parser\n");
 }

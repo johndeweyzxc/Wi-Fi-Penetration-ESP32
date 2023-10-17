@@ -16,7 +16,7 @@
 enum filter_type { MANAGEMENT, CTRL, DATA };
 
 /*
- * @brief Total maximum number of access points to scan
+ * @brief Total maximum number of AP to scan
  */
 #define MAX_SCAN_AP 20
 
@@ -36,33 +36,31 @@ typedef struct {
 void wifi_inject_frame(uint8_t *frame_buffer, int size);
 
 /*
- * @brief Scans a maximum of 20 access points
+ * @brief Scans a maximum of 20 AP
  */
 void wifi_scan_aps();
 
 /*
- * @brief Returns the scanned access points and their information
+ * @brief Returns the scanned AP and their information
  * @return ap_list_from_scan_t* which contains the number of scanned access
- * points and the list of access points and their information
+ * points and the list of AP and their information
  */
 ap_list_from_scan_t *wifi_get_scanned_aps();
 
 /*
- * @brief Connects to the access point, this function is use when armament is
- * PMKID
+ * @brief Connects to the AP, this function is use when armament is PMKID
  * @param ssid_name name of the wifi
  * @param ssid_length length of ssid name, maximum allowed length is
  * 1 to 32
  * @param channel the channel to be use which can be anything from 1 to 13
- * @param bssid mac address of the wifi which is 6 bytes
+ * @param bssid mac address of the wifi (6 bytes)
  */
 void wifi_connect_to_ap(uint8_t *ssid_name, uint8_t ssid_length,
                         uint8_t channel, uint8_t *bssid);
 
 /*
- * @brief Disconnects from the access point, this function is use when armament
- * is PMKID
- * @param bssid mac address of the wifi which is 6 bytes
+ * @brief Disconnects from the AP, this function is use when armament is PMKID
+ * @param bssid mac address of the wifi (6 bytes)
  */
 void wifi_disconnect_from_ap(uint8_t *bssid);
 

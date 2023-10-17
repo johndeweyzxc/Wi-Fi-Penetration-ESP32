@@ -64,5 +64,7 @@ void arma_cmd_event_register() {
   ESP_ERROR_CHECK(esp_event_handler_register(ARMAMENT_CMD_EVENT_BASE, CMD_EVENT,
                                              &armament_activate_or_deactivate,
                                              NULL));
-  printf("armament.arma_cmd_event_register > Arma cmd handler registered\n");
+  printf(
+      "armament.arma_cmd_event_register > Armament command receiver "
+      "registered\n");
 }

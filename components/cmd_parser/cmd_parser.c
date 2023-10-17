@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "armament_interface.h"
+#include "cmd_output.h"
 #include "esp_event.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -21,7 +22,7 @@ void clear_user_in_buff(char *user_in_buff) {
   for (uint8_t i = 0; i < 14; i++) {
     user_in_buff[i] = '0';
   }
-  printf("cmd_parser.clear_user_in_buff > *\n");
+  printf("cmd_parser.clear_user_in_buff > Cleared the user_in_buff buffer\n");
 }
 
 void clear_arma_and_bssid_buff(char *arma_selected, char *target_bssid) {
@@ -31,7 +32,9 @@ void clear_arma_and_bssid_buff(char *arma_selected, char *target_bssid) {
   for (uint8_t i = 0; i < 12; i++) {
     target_bssid[i] = '0';
   }
-  printf("cmd_parser.clear_arma_and_bssid_buff > *\n");
+  printf(
+      "cmd_parser.clear_arma_and_bssid_buff > Cleared arma_selected and "
+      "target_bssid buffer\n");
 }
 
 void set_arma_and_target(char *user_in_buff, char *arma_selected,
@@ -42,11 +45,11 @@ void set_arma_and_target(char *user_in_buff, char *arma_selected,
   user_in_buff += 2;
   memcpy(target_bssid, user_in_buff, 12);
 
-  printf("cmd_parser.set_arma_and_target > Target: ");
-  for (uint8_t i = 0; i < 12; i++) {
-    printf("%c", target_bssid[i]);
-  }
-  printf("\n");
+  char *b = target_bssid;
+  printf(
+      "cmd_parser.set_arma_and_target > Copying to target_bssid buffer: "
+      "%c%c%c%c%c%c%c%c%c%c%c%c\n",
+      b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11]);
 }
 
 void set_arma_selected(char *user_in_buff, char *arma_selected) {
@@ -54,22 +57,8 @@ void set_arma_selected(char *user_in_buff, char *arma_selected) {
   arma_selected[1] = user_in_buff[1];
 }
 
-void output_arma_status(char *arma_selected, char *target_bssid) {
-  if (arma_selected[0] == '0' && arma_selected[1] == '1') {
-    printf("{CURRENT_ARMA,%c%c,}\n", arma_selected[0], arma_selected[1]);
-  } else {
-    printf("{CURRENT_ARMA,%c%c,", arma_selected[0], arma_selected[1]);
-    for (uint8_t i = 0; i < 12; i++) {
-      printf("%c", target_bssid[i]);
-    }
-    printf(",}\n");
-  }
-}
-
 void cmd_ctrl_input_activate(char *user_in_buff, char *arma_selected,
                              char *target_bssid) {
-  printf("cmd_parser.cmd_ctrl_input_activate > Armament activate!\n");
-
   armament_cmd_event_data cmd_event_data = {
       .armament_activate = 1,
       .arma_selected = arma_selected,
@@ -97,7 +86,6 @@ void cmd_ctl_input_deactivate(char *user_in_buff, char *arma_selected,
 
   clear_user_in_buff(user_in_buff);
   clear_arma_and_bssid_buff(arma_selected, target_bssid);
-  printf("cmd_parser.cmd_ctl_input_deactivate > Armament deactivated!\n");
 }
 
 void cmd_instruction_input(char *user_in_buff, char *arma_selected,

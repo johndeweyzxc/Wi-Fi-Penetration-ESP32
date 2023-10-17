@@ -2,8 +2,7 @@
  * @file frame_output.h
  * @author johndeweyzxc (johndewey02003@gmail.com)
  * @brief Declaration of methods for formatting and outputting PMKID and MIC
- * eapol data. It also outputs important information such as the bssid and
- * station mac address
+ * from eapol data.
  */
 
 #pragma once
@@ -15,21 +14,21 @@
 /*
  * @brief Formats the mac address and copy in buffer using sprintf
  * @param *char_buff buffer to store the output
- * @param *addr pointer to the 6 bytes mac address
+ * @param *addr mac address (6 bytes)
  */
 void put_mac_addr_in_buff(char *char_buff, uint8_t *addr);
 
 /*
  * @brief Formats the snonce or anonce and copy in buffer using sprintf
  * @param *char_buff buffer to store output
- * @param *n the 32 bytes station nonce or access point nonce
+ * @param *n station nonce or access point nonce (32 bytes)
  */
 void put_nonce_in_buff(char *char_buff, uint8_t *n);
 
 /*
  * @brief Formats the MIC or PMKID and copy in buffer using sprintf
  * @param *char_buff buffer to store output
- * @param *n pointer to the 16 bytes MIC or PMKID data
+ * @param *n MIC or PMKID (16 bytes)
  */
 void put_key_in_buff(char *char_buff, uint8_t *k);
 

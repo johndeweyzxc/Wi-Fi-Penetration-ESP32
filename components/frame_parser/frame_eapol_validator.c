@@ -1,11 +1,11 @@
 /*
- * @file eapol_validator.c
+ * @file frame_eapol_validator.c
  * @author johndeweyzxc (johndewey02003@gmail.com)
  * @brief Implements functionality for validating eapol data from 4 way
  * handshake
  */
 
-#include "eapol_validator.h"
+#include "frame_eapol_validator.h"
 
 #include <stdio.h>
 

@@ -1,8 +1,8 @@
 /*
  * @file frame_output.c
  * @author johndeweyzxc (johndewey02003@gmail.com)
- * @brief Implements functionality for formatting and ouputting the result from
- * the attack
+ * @brief Implementation of methods for formatting and outputting PMKID and MIC
+ * from eapol data.
  */
 
 #include "frame_output.h"

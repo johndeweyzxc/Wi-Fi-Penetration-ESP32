@@ -1,5 +1,5 @@
 /*
- * @file eapol_validator.h
+ * @file frame_eapol_validator.h
  * @author johndeweyzxc (johndewey02003@gmail.com)
  * @brief Declaration of methods for validating eapol data
  */
@@ -54,7 +54,7 @@ uint8_t is_eapol_auth_type(eapol_frame_t *eapol_frame);
 /*
  * @brief Checks if the bssid in eapol frame matches with the set target_bssid
  * @param *eapol_frame eapol frame from first or second message of 4 way
- * @param *target_bssid 6 bytes mac address of the target bssid
+ * @param *target_bssid mac address of the target (6 bytes)
  */
 uint8_t bssid_in_eapol_matched(eapol_frame_t *eapol_frame,
                                uint8_t *target_bssid);
