@@ -15,15 +15,27 @@
 #define TDI_CORE_ID 1
 
 /*
- * @brief Loads deauthentication payload into the buffer that will be injected.
- * @param *payload_buffer The buffer to store the payload
+ * @brief Converts the hex character array (12 char) into uinsigned integer
+ * array (6 bytes) and copies it in the buffer
+ * @param *target_bssid the hex character array (12 char) of mac address of the
+ * AP
  */
-void load_deauth_payload(uint8_t *payload_buffer);
+void arma_deauth_set_target(char *target_bssid);
+
+/*
+ * @brief Loads deauthentication payload into the buffer that will be injected
+ */
+void load_deauth_payload();
 
 /*
  * @brief Task that continuously injects the deauthentication payload
  */
 void arma_run_deauth();
+
+/*
+ * @brief Injects a deauthentication frame to the AP
+ */
+void arma_deauth_inject();
 
 /*
  * @brief Kills the task arma_run_deauth()
@@ -36,12 +48,6 @@ void arma_deauth_finish();
  * @param channel The channel of access point
  */
 void arma_deauth_launching_sequence(uint8_t channel);
-
-/*
- * @brief Sets the target bssid by copying it into the buffer
- * @param *target_bssid the buffer of the target bssid (6 bytes)
- */
-void arma_mic_set_target_bssid(uint8_t *target_bssid);
 
 /*
  * @brief Starts the deauth attack

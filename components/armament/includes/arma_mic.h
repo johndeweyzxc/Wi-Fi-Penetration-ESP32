@@ -8,11 +8,19 @@
 
 #include "esp_event.h"
 
-// Configuration for the MIC sniff duration task
-#define TMS_NAME "TASK_MIC_SNIFF"
-#define TMS_STACK_SIZE 2048
-#define TMS_PRIORITY 2
-#define TMS_CORE_ID 1
+// Configuration for the MIC deauth inject task
+#define TMDI_NAME "TASK_MIC_INJECT"
+#define TMDI_STACK_SIZE 2048
+#define TMDI_PRIORITY 2
+#define TMDI_CORE_ID 1
+
+/*
+ * @brief Converts the hex character array (12 char) into uinsigned integer
+ * array (6 bytes) and copies it in the buffer
+ * @param *target_bssid the hex character array (12 char) of mac address of the
+ * AP
+ */
+void arma_mic_set_target(char *target_bssid);
 
 /*
  * @brief Callback function for handling MIC attack notification sent by frame
@@ -34,9 +42,9 @@ void arma_mic_notif_event_register();
 void arma_mic_notif_event_unregister();
 
 /*
- * @brief Deletes the MIC sniff duration task
+ * @brief Deletes the MIC deauth inject task
  */
-void arma_delete_task_mic_sniff_duration();
+void arma_mic_delete_task_deauth_inject();
 
 /*
  * @brief This function is invoke when the MIC attack finishes or fails
@@ -44,10 +52,9 @@ void arma_delete_task_mic_sniff_duration();
 void arma_mic_finishing_sequence();
 
 /*
- * @brief Countdown timer that waits for a few seconds, if it finishes then it
- * means the MIC attack failed
+ * @brief Injects a deauthentication frame every 3 seconds to the AP
  */
-void arma_mic_sniff_duration();
+void arma_mic_inject_deauth();
 
 /*
  * @brief Launches the MIC attacking sequence

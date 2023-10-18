@@ -22,7 +22,6 @@ void clear_user_in_buff(char *user_in_buff) {
   for (uint8_t i = 0; i < 14; i++) {
     user_in_buff[i] = '0';
   }
-  printf("cmd_parser.clear_user_in_buff > Cleared the user_in_buff buffer\n");
 }
 
 void clear_arma_and_bssid_buff(char *arma_selected, char *target_bssid) {
@@ -32,9 +31,6 @@ void clear_arma_and_bssid_buff(char *arma_selected, char *target_bssid) {
   for (uint8_t i = 0; i < 12; i++) {
     target_bssid[i] = '0';
   }
-  printf(
-      "cmd_parser.clear_arma_and_bssid_buff > Cleared arma_selected and "
-      "target_bssid buffer\n");
 }
 
 void set_arma_and_target(char *user_in_buff, char *arma_selected,
@@ -47,7 +43,7 @@ void set_arma_and_target(char *user_in_buff, char *arma_selected,
 
   char *b = target_bssid;
   printf(
-      "cmd_parser.set_arma_and_target > Copying to target_bssid buffer: "
+      "cmd_parser.set_arma_and_target > Target set AP: "
       "%c%c%c%c%c%c%c%c%c%c%c%c\n",
       b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11]);
 }
@@ -59,11 +55,13 @@ void set_arma_selected(char *user_in_buff, char *arma_selected) {
 
 void cmd_ctrl_input_activate(char *user_in_buff, char *arma_selected,
                              char *target_bssid) {
-  armament_cmd_event_data cmd_event_data = {
-      .armament_activate = 1,
-      .arma_selected = arma_selected,
-      .target_bssid = target_bssid,
-  };
+  printf(
+      "cmd_parser.cmd_ctl_input_deactivate > Received input: armament "
+      "activation\n");
+  armament_cmd_event_data cmd_event_data = {.armament_activate = 1};
+  memcpy(cmd_event_data.arma_selected, arma_selected, 2);
+  memcpy(cmd_event_data.target_bssid, target_bssid, 12);
+
   size_t event_data_size = sizeof(cmd_event_data);
   ESP_ERROR_CHECK(esp_event_post(ARMAMENT_CMD_EVENT_BASE, CMD_EVENT,
                                  &cmd_event_data, event_data_size,
@@ -74,10 +72,12 @@ void cmd_ctrl_input_activate(char *user_in_buff, char *arma_selected,
 
 void cmd_ctl_input_deactivate(char *user_in_buff, char *arma_selected,
                               char *target_bssid) {
-  armament_cmd_event_data cmd_event_data = {
-      .armament_activate = 0,
-      .arma_selected = arma_selected,
-  };
+  printf(
+      "cmd_parser.cmd_ctl_input_deactivate > Received input: armament "
+      "deactivation\n");
+  armament_cmd_event_data cmd_event_data = {.armament_activate = 0};
+  memcpy(cmd_event_data.arma_selected, arma_selected, 2);
+  memcpy(cmd_event_data.target_bssid, target_bssid, 12);
 
   size_t event_data_size = sizeof(cmd_event_data);
   ESP_ERROR_CHECK(esp_event_post(ARMAMENT_CMD_EVENT_BASE, CMD_EVENT,
@@ -90,9 +90,19 @@ void cmd_ctl_input_deactivate(char *user_in_buff, char *arma_selected,
 
 void cmd_instruction_input(char *user_in_buff, char *arma_selected,
                            char *target_bssid) {
+  if (memcmp(user_in_buff, PMKID, 2) == 0) {
+    printf("cmd_parser.cmd_instruction_input > Using PMKID based attack\n");
+  } else if (memcmp(user_in_buff, MIC, 2) == 0) {
+    printf("cmd_parser.cmd_instruction_input > Using MIC based attack\n");
+  } else if (memcmp(user_in_buff, DEAUTH, 2) == 0) {
+    printf("cmd_parser.cmd_instruction_input > Using DEAUTH attack\n");
+  }
+
   if (memcmp(user_in_buff, RECONNAISSANCE, 2) == 0) {
+    printf("cmd_parser.cmd_instruction_input > Using RECONNAISSANCE\n");
     set_arma_selected(user_in_buff, arma_selected);
   } else {
+    printf("cmd_parser.cmd_instruction_input > Setting armament and target\n");
     set_arma_and_target(user_in_buff, arma_selected, target_bssid);
   }
   clear_user_in_buff(user_in_buff);

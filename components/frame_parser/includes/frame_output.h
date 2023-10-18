@@ -12,7 +12,7 @@
 #include "eapol_frame.h"
 
 /*
- * @brief Formats the mac address and copy in buffer using sprintf
+ * @brief Formats the mac address and copy in buffer
  * @param *char_buff buffer to store the output
  * @param *addr mac address (6 bytes)
  */
@@ -26,7 +26,7 @@ void put_mac_addr_in_buff(char *char_buff, uint8_t *addr);
 void put_nonce_in_buff(char *char_buff, uint8_t *n);
 
 /*
- * @brief Formats the MIC or PMKID and copy in buffer using sprintf
+ * @brief Formats the MIC or PMKID and copy in buffer
  * @param *char_buff buffer to store output
  * @param *n MIC or PMKID (16 bytes)
  */
@@ -34,15 +34,22 @@ void put_key_in_buff(char *char_buff, uint8_t *k);
 
 /*
  * @brief Formats the version, type, length and key description type of
- * authentication and copy in buffer using sprintf
+ * authentication and copy in buffer
  * @param *char_buff buffer to store output
  * @param *auth_message_2 eapol data of second message from 4 way handshake
  */
 void put_m2_info_in_buff(char *char_buff, eapol_auth_data_t *auth_message_2);
 
 /*
+ * @brief Formats the replay counter and copy in buffer
+ * @param *char_buff buffer to store output
+ * @param *rc the replay counter in the eapol message
+ */
+void put_replay_counter_in_buff(char *char_buff, uint8_t *rc);
+
+/*
  * @brief Formats the key data which is the data after the MIC or PMKID and copy
- * in buffer using sprintf
+ * in buffer
  * @param *char_buff buffer to store output
  * @param *key_data the data after the MIC or PMKID in the eapol message
  * @param length length of key_data

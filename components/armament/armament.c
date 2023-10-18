@@ -11,6 +11,7 @@
 
 #include "arma_deauth.h"
 #include "arma_mic.h"
+#include "arma_output.h"
 #include "arma_pmkid.h"
 #include "arma_reconnaissance.h"
 #include "arma_utils.h"
@@ -24,25 +25,43 @@ void armament_activate(armament_cmd_event_data *cmd_event_data) {
   char *target_bssid = cmd_event_data->target_bssid;
 
   if (memcmp(arma_selected, RECONNAISSANCE, 2) == 0) {
+    printf("armament.armament_activate > Activating RECONNAISSANCE\n");
     arma_reconnaissance();
   } else if (memcmp(arma_selected, PMKID, 2) == 0) {
+    printf("armament.armament_activate > Activating PMKID\n");
     arma_pmkid(target_bssid);
   } else if (memcmp(arma_selected, MIC, 2) == 0) {
+    printf("armament.armament_activate > Activating MIC\n");
     arma_mic(target_bssid);
   } else if (memcmp(arma_selected, DEAUTH, 2) == 0) {
+    printf("armament.armament_activate > Activating DEAUTH\n");
     arma_deauth(target_bssid);
   }
 }
 
 void armament_deactivate(armament_cmd_event_data *cmd_event_data) {
   char *arma_selected = cmd_event_data->arma_selected;
+  char *target_bssid = cmd_event_data->target_bssid;
+  uint8_t u_target_bssid[6];
+
+  for (uint8_t i = 0; i < 6; i++) {
+    uint8_t s1 = target_bssid[i + i];
+    uint8_t s2 = target_bssid[i + i + 1];
+    u_target_bssid[i] = convert_to_uint8_t(s1, s2);
+  }
 
   if (memcmp(arma_selected, PMKID, 2) == 0) {
-    arma_pmkid_finishing_sequence(0);
+    printf("armament.armament_deactivate > Deactivating PMKID\n");
+    arma_pmkid_finishing_sequence();
+    output_failed_pmkid_attack(u_target_bssid);
   } else if (memcmp(arma_selected, MIC, 2) == 0) {
-    arma_mic_finishing_sequence(0);
+    printf("armament.armament_deactivate > Deactivating MIC\n");
+    arma_mic_finishing_sequence();
+    output_failed_mic_attack(u_target_bssid);
   } else if (memcmp(arma_selected, DEAUTH, 2) == 0) {
+    printf("armament.armament_deactivate > Deactivating DEAUTH\n");
     arma_deauth_finish();
+    output_stopped_deauth(u_target_bssid);
   }
 }
 
@@ -53,8 +72,10 @@ void armament_activate_or_deactivate(void *args, esp_event_base_t event_base,
   uint8_t activate_arma = cmd_event_data->armament_activate;
 
   if (activate_arma == 1) {
+    printf("armament.armament_activate_or_deactivate > ARMAMENT ACTIVATE!\n");
     armament_activate(cmd_event_data);
   } else if (activate_arma == 0) {
+    printf("armament.armament_activate_or_deactivate > ARMAMENT DEACTIVATE!\n");
     armament_deactivate(cmd_event_data);
   }
 }

