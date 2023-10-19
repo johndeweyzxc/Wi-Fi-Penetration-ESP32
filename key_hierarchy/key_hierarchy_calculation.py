@@ -1,7 +1,11 @@
+# -*- coding: utf-8 -*-
+
+# region Description
 """
-key_hierarchy_calculation.py: Calculates the PMKID and MIC to determine the Pre-Shared Key
+key_hierarchy_calculation.py: Calculates the PMKID and MIC to determine the PSK
 Author: johndeweyzxc (johndewey02003@gmail.com)
 """
+# endregion
 
 import hmac
 import hashlib

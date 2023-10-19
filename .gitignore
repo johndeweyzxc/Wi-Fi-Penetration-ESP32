@@ -1,6 +1,8 @@
 build
 .vscode
-Testcases.txt
+serial_test/test_cases.txt
+serial_test/mic_test.yaml
+serial_test/pmkid_test.yaml
 docs/Key-Hierarchy.drawio
 docs/Launcher-Module-Software-Architecture.drawio
 docs/4-Way-Handshake.drawio
