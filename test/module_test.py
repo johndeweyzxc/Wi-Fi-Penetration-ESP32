@@ -2,7 +2,7 @@
 
 # region Description
 """
-serial_com.py: Script for testing the correctness of the Launcher Module
+module_test.py: Script for testing the correctness of the Launcher Module
 Author: johndeweyzxc (johndewey02003@gmail.com)
 """
 # endregion
@@ -122,7 +122,7 @@ def is_formatted_output(value_str: str):
     last_item = len(value_list) - 1
 
     if value_list[0] == "{" and value_list[last_item] == "}":
-        print(f"{OUT_YELLOW}serial_com.py> {value_str}{COLOR_RESET}")
+        print(f"{OUT_YELLOW}module_test.py> {value_str}{COLOR_RESET}")
         return True
     else:
         print(value_str)
@@ -155,7 +155,7 @@ def execute_read_thread(port: Serial):
         except UnicodeDecodeError:
             pass
 
-    print("serial_com.py> Stopped write thread")
+    print("module_test.py> Stopped write thread")
 
 
 def execute_write_thread(port: Serial):
@@ -174,7 +174,7 @@ def execute_write_thread(port: Serial):
         else:
             port.write(serial_input.encode())
 
-    print("serial_com.py> Stopped read thread")
+    print("module_test.py> Stopped read thread")
 
 
 if __name__ == "__main__":
