@@ -53,6 +53,8 @@ void armament_deactivate(armament_cmd_event_data *cmd_event_data) {
     u_target_bssid[i] = convert_to_uint8_t(s1, s2);
   }
 
+  // TODO: Add control code for intentionally resetting the chip
+  // TODO: Add a formatted output to indicate chip restart
   if (memcmp(arma_selected, PMKID, 2) == 0) {
     printf("armament.armament_deactivate > Deactivating PMKID\n");
     output_failed_pmkid_attack(u_target_bssid);

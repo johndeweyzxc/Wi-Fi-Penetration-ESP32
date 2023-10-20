@@ -77,7 +77,7 @@ In this project, three hardware components are employed: an Android device, USB 
 
 ## How to crack the PMKID or MIC to determine the PSK
 
-Neither the Command Launch Module nor the Launcher Module possesses the requisite capabilities to perform cryptographic cracking operations due to their limited computational power. For comprehensive information on optimizing the process of cracking, kindly refer to the 'key_hierarchy' directory
+Neither the Command Launch Module nor the Launcher Module possesses the requisite capabilities to perform cryptographic cracking operations due to their limited computational power. For comprehensive information on optimizing the process of cracking, kindly refer to the crypto directory
 
 ## Glossary
 

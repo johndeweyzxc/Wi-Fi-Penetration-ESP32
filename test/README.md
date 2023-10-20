@@ -1,6 +1,6 @@
-## Serial input output testing
+## Launcher Module Testing
 
-The script `serial_com.py` serves the purpose of validating the accuracy and correctness of the Launcher Module. It accomplishes this by extracting pertinent data, such as MIC and PMKID, from the output, and subsequently creating a YAML file for storage. The extracted information within this YAML file can then be accessed and processed by the script `key_hierarchy_calculation.py`, situated in the key_hierarchy directory.
+The script `module_test.py` serves the purpose of validating the accuracy and correctness of the Launcher Module. It accomplishes this by extracting pertinent data, such as MIC and PMKID, from the output of the module, and subsequently creating a YAML file for storing the output. The extracted information within this YAML file can then be accessed and processed by the script `key_hierarchy_calculation.py`, situated in the crypto directory.
 
 Within the `key_hierarchy_calculation.py` script, the system performs key computations, resulting in the generation of essential cryptographic keys, namely the PMK, PTK, and MIC or PMKID.  If the calculated MIC or PMKID aligns with the corresponding output, the Launcher Module is working as expected.
 
