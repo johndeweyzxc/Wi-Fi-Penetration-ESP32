@@ -19,20 +19,17 @@
 
 ESP_EVENT_DEFINE_BASE(FRAME_RECEIVED_EVENT_BASE);
 ESP_EVENT_DEFINE_BASE(ARMAMENT_ATTACK_STATUS_EVENT_BASE);
-static uint8_t *bssid = NULL;
+static uint8_t u_target_bssid[6];
 static uint8_t parse_type = NULL_PARSE_TYPE;
 
 // For MIC parsing, current eapol message number
 static uint8_t curr_eapol_m_num = 0;
 // For MIC parsing, current eapol station mac address
-static uint8_t curr_eapol_sta_mac[6] = {0, 0, 0, 0, 0, 0};
+static uint8_t curr_eapol_sta_mac[6];
 // For MIC parsing, flag if message 2 is received
 static uint8_t received_eapol_message_2 = 0;
 
 void pmkid_notify_armament() {
-  printf(
-      "frame_parser.pmkid_notify_armament > Message 1 contains PMKID, "
-      "notifying armament\n");
   arma_atk_event_data_t event_data;
   event_data.atk_context = PMKID_BASED;
   ESP_ERROR_CHECK(esp_event_post(ARMAMENT_ATTACK_STATUS_EVENT_BASE,
@@ -55,9 +52,6 @@ void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
 }
 
 void mic_notify_armament() {
-  printf(
-      "frame_parser.mic_notify_armament > Message 2 contains MIC, notifying "
-      "armament\n");
   arma_atk_event_data_t event_data;
   event_data.atk_context = MIC_BASED;
 
@@ -152,7 +146,8 @@ void data_frame_parser(void *args, esp_event_base_t event_base,
     return;
   }
   // Checks if bssid in eapol frame matched with target bssid
-  if (bssid_in_eapol_matched(eapol_frame, bssid) == BSSID_NOT_MATCHED) {
+  if (bssid_in_eapol_matched(eapol_frame, u_target_bssid) ==
+      BSSID_NOT_MATCHED) {
     return;
   }
   // Checks if authentication type is Authentication (0x888e)
@@ -185,11 +180,11 @@ void frame_parser_register_data_frame_handler() {
 }
 
 void frame_parser_clear_target_parameter() {
-  bssid = NULL;
+  for (uint8_t i = 0; i < 6; i++) {
+    u_target_bssid[i] = '0';
+  }
   parse_type = NULL_PARSE_TYPE;
-  printf(
-      "frame_parser.frame_parser_clear_target_parameter > Cleared target "
-      "parameter in frame parser\n");
+  printf("frame_parser.frame_parser_clear_target_parameter > Target unset\n");
 }
 
 void frame_parser_set_target_parameter(uint8_t *target_bssid,
@@ -199,9 +194,14 @@ void frame_parser_set_target_parameter(uint8_t *target_bssid,
   // Resets the flag for checking if message 2 is received
   received_eapol_message_2 = 0;
 
-  bssid = target_bssid;
+  memcpy(u_target_bssid, target_bssid, 6);
   parse_type = selected_parse_type;
+  uint8_t *b = u_target_bssid;
   printf(
-      "frame_parser.frame_parser_set_target_parameter > Target set in "
-      "frame parser\n");
+      "frame_parser.frame_parser_set_target_parameter > Target set AP: "
+      "%02X%02X%02X%02X%02X%02X\n",
+      b[0], b[1], b[2], b[3], b[4], b[5]);
+  printf(
+      "frame_parser.frame_parser_set_target_parameter > Armament set: %02X\n",
+      selected_parse_type);
 }

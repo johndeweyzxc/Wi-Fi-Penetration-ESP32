@@ -25,16 +25,18 @@ void armament_activate(armament_cmd_event_data *cmd_event_data) {
   char *target_bssid = cmd_event_data->target_bssid;
 
   if (memcmp(arma_selected, RECONNAISSANCE, 2) == 0) {
-    printf("armament.armament_activate > Activating RECONNAISSANCE\n");
+    printf(
+        "armament.armament_activate > Activating RECONNAISSANCE for scanning "
+        "access points\n");
     arma_reconnaissance();
   } else if (memcmp(arma_selected, PMKID, 2) == 0) {
-    printf("armament.armament_activate > Activating PMKID\n");
+    printf("armament.armament_activate > Activating PMKID based attack\n");
     arma_pmkid(target_bssid);
   } else if (memcmp(arma_selected, MIC, 2) == 0) {
-    printf("armament.armament_activate > Activating MIC\n");
+    printf("armament.armament_activate > Activating MIC based attack\n");
     arma_mic(target_bssid);
   } else if (memcmp(arma_selected, DEAUTH, 2) == 0) {
-    printf("armament.armament_activate > Activating DEAUTH\n");
+    printf("armament.armament_activate > Activating DEAUTH based attack\n");
     arma_deauth(target_bssid);
   }
 }
@@ -72,10 +74,10 @@ void armament_activate_or_deactivate(void *args, esp_event_base_t event_base,
   uint8_t activate_arma = cmd_event_data->armament_activate;
 
   if (activate_arma == 1) {
-    printf("armament.armament_activate_or_deactivate > ARMAMENT ACTIVATE!\n");
+    output_armament_activation();
     armament_activate(cmd_event_data);
   } else if (activate_arma == 0) {
-    printf("armament.armament_activate_or_deactivate > ARMAMENT DEACTIVATE!\n");
+    output_armament_deactivation();
     armament_deactivate(cmd_event_data);
   }
 }

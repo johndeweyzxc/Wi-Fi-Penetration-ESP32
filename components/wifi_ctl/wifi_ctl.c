@@ -56,10 +56,10 @@ void wifi_connect_to_ap(uint8_t *ssid_name, uint8_t ssid_length,
 
   printf(
       "wifi_ctl.wifi_connect_to_ap > Connecting to AP: "
-      "%02X%02X%02X%02X%02X%02X\n",
-      bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
-  printf("wifi_ctl.wifi_connect_to_ap > SSID: %s\n", ssid_name);
-  printf("wifi_ctl.wifi_connect_to_ap > Channel: %u\n", channel);
+      "%02X%02X%02X%02X%02X%02X %s "
+      "at channel %u\n",
+      bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5], ssid_name,
+      channel);
 
   wifi_config_t wifi_config = {
       .sta = {.channel = channel,

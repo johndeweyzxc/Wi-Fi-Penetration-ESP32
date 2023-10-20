@@ -46,6 +46,8 @@ void set_arma_and_target(char *user_in_buff, char *arma_selected,
       "cmd_parser.set_arma_and_target > Target set AP: "
       "%c%c%c%c%c%c%c%c%c%c%c%c\n",
       b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11]);
+  printf("cmd_parser.set_arma_and_target > Armament set: %c%c\n",
+         arma_selected[0], arma_selected[1]);
 }
 
 void set_arma_selected(char *user_in_buff, char *arma_selected) {
@@ -55,9 +57,6 @@ void set_arma_selected(char *user_in_buff, char *arma_selected) {
 
 void cmd_ctrl_input_activate(char *user_in_buff, char *arma_selected,
                              char *target_bssid) {
-  printf(
-      "cmd_parser.cmd_ctl_input_deactivate > Received input: armament "
-      "activation\n");
   armament_cmd_event_data cmd_event_data = {.armament_activate = 1};
   memcpy(cmd_event_data.arma_selected, arma_selected, 2);
   memcpy(cmd_event_data.target_bssid, target_bssid, 12);
@@ -72,9 +71,6 @@ void cmd_ctrl_input_activate(char *user_in_buff, char *arma_selected,
 
 void cmd_ctl_input_deactivate(char *user_in_buff, char *arma_selected,
                               char *target_bssid) {
-  printf(
-      "cmd_parser.cmd_ctl_input_deactivate > Received input: armament "
-      "deactivation\n");
   armament_cmd_event_data cmd_event_data = {.armament_activate = 0};
   memcpy(cmd_event_data.arma_selected, arma_selected, 2);
   memcpy(cmd_event_data.target_bssid, target_bssid, 12);
@@ -102,7 +98,6 @@ void cmd_instruction_input(char *user_in_buff, char *arma_selected,
     printf("cmd_parser.cmd_instruction_input > Using RECONNAISSANCE\n");
     set_arma_selected(user_in_buff, arma_selected);
   } else {
-    printf("cmd_parser.cmd_instruction_input > Setting armament and target\n");
     set_arma_and_target(user_in_buff, arma_selected, target_bssid);
   }
   clear_user_in_buff(user_in_buff);

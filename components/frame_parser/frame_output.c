@@ -141,3 +141,7 @@ void output_mic_from_message_2(eapol_frame_t *message_2) {
   sprintf(p_m2_buffer, ",");
   printf("{MIC_MSG_2,%s}\n", m2_buffer);
 }
+
+void output_wrong_pmkid_key_data_type(uint8_t key_type) {
+  printf("{WRONG_PMKID_KEY_TYPE,%02X,}\n", key_type);
+}

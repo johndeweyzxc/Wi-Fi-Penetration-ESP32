@@ -12,6 +12,7 @@
 #include "arpa/inet.h"
 #include "eapol_frame.h"
 #include "frame_constants.h"
+#include "frame_output.h"
 
 uint8_t eapol_valid_pmkid(wpa_key_data_t *key_data) {
   uint8_t data_type = key_data->key_data_type;
@@ -19,21 +20,21 @@ uint8_t eapol_valid_pmkid(wpa_key_data_t *key_data) {
   uint8_t oui_type = key_data->oui_type;
 
   if (data_type != WPA_KEY_DATA_TYPE) {
-    printf("eapol_validator.eapol_valid_pmkid > Wrong pmkid key type: %x\n",
-           data_type);
+    output_wrong_pmkid_key_data_type(data_type);
     return WRONG_PMKID;
   }
 
   for (uint8_t i = 0; i < 3; i++) {
     if (oui[i] != WPA_KEY_DATA_OUI[i]) {
-      printf("eapol_validator.eapol_valid_pmkid > Wrong pmkid oui: %x%x%x\n",
-             oui[0], oui[1], oui[2]);
+      printf(
+          "eapol_validator.eapol_valid_pmkid > Wrong pmkid oui: %02X%02X%02X\n",
+          oui[0], oui[1], oui[2]);
       return WRONG_PMKID;
     }
   }
 
   if (oui_type != WPA_KEY_DATA_TYPE_PMKID_KDE) {
-    printf("eapol_validator.eapol_valid_pmkid > Wrong pmkid oui type: %x\n",
+    printf("eapol_validator.eapol_valid_pmkid > Wrong pmkid oui type: %02X\n",
            oui_type);
     return WRONG_PMKID;
   }
@@ -45,7 +46,7 @@ uint8_t is_eapol_auth_type(eapol_frame_t *eapol_frame) {
   uint16_t auth_type = logic_link_ctrl->authentication_type;
 
   if (ntohs(auth_type) != EAPOL_AUTH_TYPE) {
-    printf("eapol_validator.is_eapol_auth_type > Wrong eapol auth type: %x\n",
+    printf("eapol_validator.is_eapol_auth_type > Wrong eapol auth type: %02X\n",
            auth_type);
     return WRONG_EAPOL_AUTH_TYPE;
   } else {

