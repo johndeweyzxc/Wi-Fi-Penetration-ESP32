@@ -14,6 +14,10 @@ import yaml
 from hashlib import pbkdf2_hmac
 from binascii import a2b_hex, hexlify
 
+OUT_GREEN = "\033[92m"
+OUT_RED = "\033[91m"
+COLOR_RESET = "\033[0m"
+
 
 def prf512(key, a, b):
     """ The PRF512 function is used to compute four 128-bit keys (KCK, KEK, TK1, TK2) """
@@ -42,7 +46,7 @@ def calculate_pmk(psk, ssid) -> bytes:
     pbkdf2 = pbkdf2_hmac('sha1', psk.encode('utf-8'),
                          ssid.encode('utf-8'), 4096, 32)
     pmk_str = hexlify(pbkdf2)
-    print(f"PMK: {pmk_str.decode('ascii')}")
+    print(f"PMK: {pmk_str.decode('ascii').upper()}")
     return pbkdf2
 
 
@@ -65,7 +69,7 @@ def calculate_ptk(psk, ssid, bssid, sta_mac, snonce, anonce) -> bytes:
     b = min_max_mac + min_max_nonce
     pmk = calculate_pmk(psk, ssid)
     ptk = prf512(pmk, a, b)
-    print(f"PTK: {hexlify(ptk).decode('ascii')}")
+    print(f"PTK: {hexlify(ptk).decode('ascii').upper()}")
     return ptk
 
 
@@ -86,10 +90,10 @@ def calculate_pmkid(psk, ssid, bssid, sta_mac):
     pmkid = hmac.new(pmk, b'PMK Name' + a2b_hex(bssid) +
                      a2b_hex(sta_mac), hashlib.sha1)
     pmkid_hex = pmkid.hexdigest()[0:32]
-    print(f"PMKID: {pmkid_hex}")
+    print(f"PMKID: {pmkid_hex.upper()}")
 
 
-def calculate_mic(psk, ssid, anonce, snonce, bssid, sta_mac, message_2_data):
+def calculate_mic(psk, ssid, anonce, snonce, bssid, sta_mac, message_2_data, mic):
     """
     MIC (Message Integrity Code)
 
@@ -104,8 +108,12 @@ def calculate_mic(psk, ssid, anonce, snonce, bssid, sta_mac, message_2_data):
     the 4-way handshake.
     """
     ptk = calculate_ptk(psk, ssid, bssid, sta_mac, snonce, anonce)
-    mic = hmac.new(ptk[0:16], a2b_hex(message_2_data), hashlib.sha1)
-    print(f"MIC: {mic.hexdigest()[:32]}")
+    calculated_mic = hmac.new(ptk[0:16], a2b_hex(message_2_data), hashlib.sha1)
+    print(f"MIC: {calculated_mic.hexdigest()[:32].upper()}")
+    if calculated_mic.hexdigest()[:32].upper() == mic:
+        print(f"{OUT_GREEN}MIC MATCHED!{COLOR_RESET}")
+    else:
+        print(f"{OUT_RED}MIC NOT MATCHED!{COLOR_RESET}")
 
 
 def set_mic_to_all_zero(mic) -> str:
@@ -142,6 +150,7 @@ if __name__ == "__main__":
         sta_mac = mic_content["sta_mac"]
         anonce = mic_content["anonce"]
         snonce = mic_content["snonce"]
+        mic = mic_content["mic"]
         m2_data = set_mic_to_all_zero(mic_content["m2_data"])
 
-        calculate_mic(psk, ssid, anonce, snonce, bssid, sta_mac, m2_data)
+        calculate_mic(psk, ssid, anonce, snonce, bssid, sta_mac, m2_data, mic)

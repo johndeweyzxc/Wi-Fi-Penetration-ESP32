@@ -12,3 +12,5 @@ anonce: ""
 snonce: ""
 # Message 2 or the whole authentication data on the second message
 m2_data: ""
+# The MIC from message 2
+mic: ""

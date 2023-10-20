@@ -2,7 +2,7 @@
 
 # region Description
 """
-serial_com.py: Script for testing the correctness of the software
+serial_com.py: Script for testing the correctness of the Launcher Module
 Author: johndeweyzxc (johndewey02003@gmail.com)
 """
 # endregion
@@ -12,6 +12,8 @@ import threading
 import yaml
 
 MAX_BUFF_LEN = 255
+OUT_YELLOW = "\033[93m"
+COLOR_RESET = "\033[0m"
 stop_thread = threading.Event()
 scanned_aps = {}
 mic_info = {}
@@ -99,33 +101,36 @@ def handle_ssid_from_scanned_aps(scan: list):
     scanned_aps[f"{scan[1]}"] = scan[2]
 
 
-def generate_eapol_message(valueStr: str):
-    """ Determines if the serial output is a formatted output or has curly brackets """
+def generate_eapol_message(value_content: list):
+    """ Determine what type of serial output """
 
-    value_list = list(valueStr)
+    if len(value_content) == 14 or len(value_content) == 5 or len(value_content) == 6:
+        if value_content[0] == "MIC_MSG_1":
+            generate_eapol_message_1_yaml(value_content)
+        elif value_content[0] == "MIC_MSG_2":
+            generate_eapol_message_2_yaml(value_content)
+        elif value_content[0] == "PMKID":
+            generate_eapol_pmkid_message_1_yaml(value_content)
+        elif value_content[0] == "SCAN":
+            handle_ssid_from_scanned_aps(value_content)
+
+
+def is_formatted_output(value_str: str):
+    """ Determine if the serial output has curly brackets """
+
+    value_list = list(value_str)
     last_item = len(value_list) - 1
 
     if value_list[0] == "{" and value_list[last_item] == "}":
-        print(f"serial_com.py> -> FORMATTED OUTPUT: {valueStr}")
-        value_list.remove("{")
-        value_list.remove("}")
-
-        # * Convert the value list back to string then split it which makes it a list again
-        value_content = "".join(value_list).split(",")
-        if len(value_content) == 14 or len(value_content) == 5 or len(value_content) == 6:
-
-            if value_content[0] == "MIC_MSG_1":
-                generate_eapol_message_1_yaml(value_content)
-            elif value_content[0] == "MIC_MSG_2":
-                generate_eapol_message_2_yaml(value_content)
-            elif value_content[0] == "PMKID":
-                generate_eapol_pmkid_message_1_yaml(value_content)
-            elif value_content[0] == "SCAN":
-                handle_ssid_from_scanned_aps(value_content)
+        print(f"{OUT_YELLOW}serial_com.py> {value_str}{COLOR_RESET}")
+        return True
+    else:
+        print(value_str)
+        return False
 
 
 def execute_read_thread(port: Serial):
-    """ Listen for serial output and do a processing if the output is formatted or has curly brackets """
+    """ Listen for serial output and do a processing on those outputs """
 
     while True:
         if stop_thread.is_set():
@@ -133,10 +138,19 @@ def execute_read_thread(port: Serial):
 
         value = port.readline().replace(b'\n', b'').replace(b'\r', b'')
         try:
-            valueStr = str(value, 'UTF-8')
-            if len(valueStr) > 0:
-                print(valueStr)
-                generate_eapol_message(valueStr)
+            value_str = str(value, 'UTF-8')
+            if len(value_str) < 1:
+                continue
+
+            if not is_formatted_output(value_str):
+                continue
+
+            value_list = list(value_str)
+            value_list.remove("{")
+            value_list.remove("}")
+            # * Convert the list back to string then split it by "," which makes it a list again
+            value_content = "".join(value_list).split(",")
+            generate_eapol_message(value_content)
 
         except UnicodeDecodeError:
             pass
@@ -145,18 +159,20 @@ def execute_read_thread(port: Serial):
 
 
 def execute_write_thread(port: Serial):
-    """ Listen for user input then sends it into the ESP32 """
+    """ Listen for user input then sends it into the Launcher Module """
 
     while True:
         if stop_thread.is_set():
             break
 
         serial_input = input()
-        if len(serial_input) > 0:
-            if serial_input == "close":
-                stop_thread.set()
-            else:
-                port.write(serial_input.encode())
+        if len(serial_input) < 1:
+            continue
+
+        if serial_input == "close":
+            stop_thread.set()
+        else:
+            port.write(serial_input.encode())
 
     print("serial_com.py> Stopped read thread")
 
