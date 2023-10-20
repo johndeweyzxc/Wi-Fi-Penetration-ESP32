@@ -16,6 +16,7 @@
 #include "arma_reconnaissance.h"
 #include "arma_utils.h"
 #include "esp_event.h"
+#include "esp_system.h"
 #include "wifi_ctl_interface.h"
 
 ESP_EVENT_DEFINE_BASE(ARMAMENT_CMD_EVENT_BASE);
@@ -54,12 +55,12 @@ void armament_deactivate(armament_cmd_event_data *cmd_event_data) {
 
   if (memcmp(arma_selected, PMKID, 2) == 0) {
     printf("armament.armament_deactivate > Deactivating PMKID\n");
-    arma_pmkid_finishing_sequence();
     output_failed_pmkid_attack(u_target_bssid);
+    esp_restart();
   } else if (memcmp(arma_selected, MIC, 2) == 0) {
     printf("armament.armament_deactivate > Deactivating MIC\n");
-    arma_mic_finishing_sequence();
     output_failed_mic_attack(u_target_bssid);
+    esp_restart();
   } else if (memcmp(arma_selected, DEAUTH, 2) == 0) {
     printf("armament.armament_deactivate > Deactivating DEAUTH\n");
     arma_deauth_finish();

@@ -34,7 +34,7 @@ void pmkid_notify_armament() {
   event_data.atk_context = PMKID_BASED;
   ESP_ERROR_CHECK(esp_event_post(ARMAMENT_ATTACK_STATUS_EVENT_BASE,
                                  ATK_STATS_EVENT_ID, &event_data,
-                                 sizeof(event_data), portMAX_DELAY));
+                                 sizeof(event_data), 0));
 }
 
 void parse_pmkid(eapol_auth_data_t *wpa_data, eapol_frame_t *eapol_frame,
@@ -57,7 +57,7 @@ void mic_notify_armament() {
 
   ESP_ERROR_CHECK(esp_event_post(ARMAMENT_ATTACK_STATUS_EVENT_BASE,
                                  ATK_STATS_EVENT_ID, &event_data,
-                                 sizeof(event_data), portMAX_DELAY));
+                                 sizeof(event_data), 0));
 }
 
 void parse_anonce_message_1(mac_header_t *mac_header, eapol_frame_t *msg_1) {
@@ -201,7 +201,13 @@ void frame_parser_set_target_parameter(uint8_t *target_bssid,
       "frame_parser.frame_parser_set_target_parameter > Target set AP: "
       "%02X%02X%02X%02X%02X%02X\n",
       b[0], b[1], b[2], b[3], b[4], b[5]);
-  printf(
-      "frame_parser.frame_parser_set_target_parameter > Armament set: %02X\n",
-      selected_parse_type);
+  if (selected_parse_type == PARSE_PMKID) {
+    printf(
+        "frame_parser.frame_parser_set_target_parameter > Frame type to parse: "
+        "PMKID\n");
+  } else if (selected_parse_type == PARSE_MIC) {
+    printf(
+        "frame_parser.frame_parser_set_target_parameter > Frame type to parse: "
+        "MIC\n");
+  }
 }

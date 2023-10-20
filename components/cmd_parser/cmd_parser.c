@@ -63,8 +63,7 @@ void cmd_ctrl_input_activate(char *user_in_buff, char *arma_selected,
 
   size_t event_data_size = sizeof(cmd_event_data);
   ESP_ERROR_CHECK(esp_event_post(ARMAMENT_CMD_EVENT_BASE, CMD_EVENT,
-                                 &cmd_event_data, event_data_size,
-                                 portMAX_DELAY));
+                                 &cmd_event_data, event_data_size, 0));
 
   clear_user_in_buff(user_in_buff);
 }
