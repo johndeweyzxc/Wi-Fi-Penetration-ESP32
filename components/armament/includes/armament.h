@@ -18,6 +18,7 @@
 #define ARMA_STATUS "05"
 #define ARMA_ACTIVATE "06"
 #define ARMA_DEACTIVATE "07"
+#define ESP_RESET "08"
 
 /*
  * @brief enum for checking if wifi is initialized or not

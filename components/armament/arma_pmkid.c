@@ -135,7 +135,7 @@ void arma_pmkid(char *target_bssid) {
   ap_list_from_scan_t *ap_list = wifi_get_scanned_aps();
   wifi_ap_record_t *ap_records = ap_list->ap_record_list;
   uint16_t total_scanned_aps = ap_list->count;
-  printf("arma_pmkid.arma_pmkid > Found %u APs\n", total_scanned_aps);
+  output_number_of_aps(total_scanned_aps);
 
   uint8_t found_target_ap = 0;
   uint8_t index_of_target_ap = 0;

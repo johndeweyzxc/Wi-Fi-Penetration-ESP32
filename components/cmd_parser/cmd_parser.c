@@ -12,6 +12,7 @@
 #include "armament_interface.h"
 #include "cmd_output.h"
 #include "esp_event.h"
+#include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
@@ -121,6 +122,8 @@ void cmd_parser() {
       cmd_ctrl_input_activate(user_in_buff, arma_selected, target_bssid);
     } else if (memcmp(user_in_buff, ARMA_DEACTIVATE, 2) == 0) {
       cmd_ctl_input_deactivate(user_in_buff, arma_selected, target_bssid);
+    } else if (memcmp(user_in_buff, ESP_RESET, 2) == 0) {
+      esp_restart();
     } else if (memcmp(user_in_buff, NULL_ARMA, 2) == 0) {
       continue;
     } else {
