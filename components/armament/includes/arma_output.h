@@ -39,6 +39,13 @@ void output_mic_launching_sequence();
 void output_mic_deauth_status(int current_time);
 
 /*
+ * @brief Indicates that the MIC attack failed because the target AP is not
+ * found
+ * @param *target_bssid mac address (6 bytes) of the target AP
+ */
+void output_failed_mic_not_found_ap(uint8_t *target_bssid);
+
+/*
  * @brief Indicates the MIC finishing sequence
  */
 void output_mic_finishing_sequence();

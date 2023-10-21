@@ -157,6 +157,6 @@ void arma_pmkid(char *target_bssid) {
     printf("arma_pmkid.arma_pmkid > Target AP channel: %u\n", channel);
     arma_pmkid_launching_sequence(ap_record.ssid, ssid_len, channel);
   } else if (found_target_ap == 0) {
-    output_failed_pmkid_not_found_ap(u_target_bssid);
+    output_failed_mic_not_found_ap(u_target_bssid);
   }
 }

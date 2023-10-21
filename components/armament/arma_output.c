@@ -31,6 +31,12 @@ void output_mic_deauth_status(int current_time) {
   printf("{MIC_DEAUTH_TIME_ELAPSED,%d,}\n", current_time);
 }
 
+void output_failed_mic_not_found_ap(uint8_t *target_bssid) {
+  uint8_t *b = target_bssid;
+  printf("{MIC_AP_NOT_FOUND,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
+         b[3], b[4], b[5]);
+}
+
 void output_mic_finishing_sequence() { printf("{MIC_FINISHING_SEQUENCE,}\n"); }
 
 void output_success_mic_attack(uint8_t *target_bssid) {
@@ -53,7 +59,7 @@ void output_pmkid_operation_started(uint8_t *target_bssid) {
 
 void output_failed_pmkid_not_found_ap(uint8_t *target_bssid) {
   uint8_t *b = target_bssid;
-  printf("{PMKID_NOT_FOUND_AP,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
+  printf("{PMKID_AP_NOT_FOUND,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
          b[3], b[4], b[5]);
 }
 
@@ -97,7 +103,7 @@ void output_deauth_status(int current_time) {
 
 void output_failed_deauth_not_found_ap(uint8_t *target_bssid) {
   uint8_t *b = target_bssid;
-  printf("{DEAUTH_NOT_FOUND_AP,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
+  printf("{DEAUTH_AP_NOT_FOUND,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
          b[3], b[4], b[5]);
 }
 
