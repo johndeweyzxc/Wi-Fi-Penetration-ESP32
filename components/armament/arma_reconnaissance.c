@@ -23,9 +23,9 @@ void arma_reconnaissance() {
     uint8_t *bssid = ap_record.bssid;
     // An RSSI of -124 is 132 if typecasted from int to uint to bring back
     // original value do: 255 - 132 + 1 = 124.
-    printf("{RECONNAISSANCE,SCAN,%02X%02X%02X%02X%02X%02X,%s,%02X,%02X,}\n",
+    printf("{RECONNAISSANCE,SCAN,%02X%02X%02X%02X%02X%02X,%s,%d,%u,}\n",
            bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5],
-           ap_record.ssid, (uint8_t)ap_record.rssi, (uint8_t)ap_record.primary);
+           ap_record.ssid, ap_record.rssi, ap_record.primary);
   }
   printf("{RECONNAISSANCE,FINISH_SCAN}\n");
 }

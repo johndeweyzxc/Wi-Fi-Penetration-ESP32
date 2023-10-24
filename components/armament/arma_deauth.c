@@ -99,9 +99,9 @@ void arma_deauth(char *target_bssid) {
   for (uint16_t i = 0; i < total_scanned_aps; i++) {
     wifi_ap_record_t ap_record = ap_records[i];
     uint8_t *bssid = ap_record.bssid;
-    printf("{DEAUTH,SCAN,%02X%02X%02X%02X%02X%02X,%s,%02X,%02X,}\n", bssid[0],
+    printf("{DEAUTH,SCAN,%02X%02X%02X%02X%02X%02X,%s,%d,%u,}\n", bssid[0],
            bssid[1], bssid[2], bssid[3], bssid[4], bssid[5], ap_record.ssid,
-           (uint8_t)ap_record.rssi, (uint8_t)ap_record.primary);
+           ap_record.rssi, ap_record.primary);
 
     if (memcmp(ap_record.bssid, u_target_bssid, 6) == 0) {
       found_target_ap = 1;
