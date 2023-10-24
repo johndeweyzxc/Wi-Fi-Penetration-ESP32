@@ -29,7 +29,10 @@ void wifi_scan_aps() {
 
   wifi_scan_config_t scan_config = {.ssid = NULL,
                                     .bssid = NULL,
+                                    .show_hidden = true,
                                     .channel = 0,
+                                    .scan_time.active.min = 200,
+                                    .scan_time.active.max = 500,
                                     .scan_type = WIFI_SCAN_TYPE_ACTIVE};
 
   ESP_ERROR_CHECK(esp_wifi_scan_start(&scan_config, true));

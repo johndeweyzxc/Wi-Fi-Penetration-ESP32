@@ -10,7 +10,6 @@
 #include <string.h>
 
 #include "armament_interface.h"
-#include "cmd_output.h"
 #include "esp_event.h"
 #include "esp_system.h"
 #include "freertos/FreeRTOS.h"
@@ -116,7 +115,15 @@ void cmd_parser() {
     scanf("%14s", user_in_buff);
 
     if (memcmp(user_in_buff, ARMA_STATUS, 2) == 0) {
-      output_arma_status(arma_selected, target_bssid);
+      if (arma_selected[0] == '0' && arma_selected[1] == '1') {
+        printf("{CMD_PARSER,CURRENT_ARMA,%c%c,}\n", arma_selected[0],
+               arma_selected[1]);
+      } else {
+        char *b = target_bssid;
+        printf("{CMD_PARSER,CURRENT_ARMA,%c%c,%c%c%c%c%c%c%c%c%c%c%c%c,}\n",
+               arma_selected[0], arma_selected[1], b[0], b[1], b[2], b[3], b[4],
+               b[5], b[6], b[7], b[8], b[9], b[10], b[11]);
+      }
       clear_user_in_buff(user_in_buff);
     } else if (memcmp(user_in_buff, ARMA_ACTIVATE, 2) == 0) {
       cmd_ctrl_input_activate(user_in_buff, arma_selected, target_bssid);

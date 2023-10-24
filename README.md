@@ -41,6 +41,7 @@ Code:               Name:                   Description:
 "05"                Armament status         Outputs the currently selected armament
 "06"                Armament activate       Actives the selected armament
 "07"                Armament deactivate     Deactivates the selected armament
+"08"                Armament reset          Resets the ESP32
 ```
 
 ### Example Instruction Codes

@@ -11,7 +11,6 @@
 
 #include "arma_deauth.h"
 #include "arma_mic.h"
-#include "arma_output.h"
 #include "arma_pmkid.h"
 #include "arma_reconnaissance.h"
 #include "arma_utils.h"
@@ -53,20 +52,24 @@ void armament_deactivate(armament_cmd_event_data *cmd_event_data) {
     u_target_bssid[i] = convert_to_uint8_t(s1, s2);
   }
 
-  // TODO: Add control code for intentionally resetting the chip
-  // TODO: Add a formatted output to indicate chip restart
   if (memcmp(arma_selected, PMKID, 2) == 0) {
     printf("armament.armament_deactivate > Deactivating PMKID\n");
-    output_failed_pmkid_attack(u_target_bssid);
+    uint8_t *b = u_target_bssid;
+    printf("{PMKID,FAILURE,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
+           b[3], b[4], b[5]);
     esp_restart();
   } else if (memcmp(arma_selected, MIC, 2) == 0) {
     printf("armament.armament_deactivate > Deactivating MIC\n");
-    output_failed_mic_attack(u_target_bssid);
+    uint8_t *b = u_target_bssid;
+    printf("{MIC,FAILURE,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2], b[3],
+           b[4], b[5]);
     esp_restart();
   } else if (memcmp(arma_selected, DEAUTH, 2) == 0) {
     printf("armament.armament_deactivate > Deactivating DEAUTH\n");
     arma_deauth_finish();
-    output_stopped_deauth(u_target_bssid);
+    uint8_t *b = u_target_bssid;
+    printf("{DEAUTH,STOPPED,%02X%02X%02X%02X%02X%02X,}\n", b[0], b[1], b[2],
+           b[3], b[4], b[5]);
   }
 }
 
@@ -77,10 +80,10 @@ void armament_activate_or_deactivate(void *args, esp_event_base_t event_base,
   uint8_t activate_arma = cmd_event_data->armament_activate;
 
   if (activate_arma == 1) {
-    output_armament_activation();
+    printf("{ARMAMENT,ACTIVATE,}\n");
     armament_activate(cmd_event_data);
   } else if (activate_arma == 0) {
-    output_armament_deactivation();
+    printf("{ARMAMENT,DEACTIVATE,}\n");
     armament_deactivate(cmd_event_data);
   }
 }

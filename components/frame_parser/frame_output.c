@@ -87,7 +87,7 @@ void output_pmkid(eapol_frame_t *message_1) {
   p_m1_buffer += 13;
   // PMKID (Pairwise Master Key Identifier)
   put_key_in_buff(p_m1_buffer, key_data->pmkid);
-  printf("{PMKID,%s}\n", m1_buffer);
+  printf("{PMKID,MSG_1,%s}\n", m1_buffer);
 }
 
 void output_anonce_from_message_1(eapol_frame_t *message_1) {
@@ -105,7 +105,7 @@ void output_anonce_from_message_1(eapol_frame_t *message_1) {
   p_m1_buffer += 13;
   // Anonce (Access point nonce)
   put_nonce_in_buff(p_m1_buffer, auth_message_1->wpa_key_nonce);
-  printf("{MIC_MSG_1,%s}\n", m1_buffer);
+  printf("{MIC,MSG_1,%s}\n", m1_buffer);
 }
 
 void output_mic_from_message_2(eapol_frame_t *message_2) {
@@ -139,9 +139,9 @@ void output_mic_from_message_2(eapol_frame_t *message_2) {
                        key_data_length);
   p_m2_buffer += (key_data_length * 2);
   sprintf(p_m2_buffer, ",");
-  printf("{MIC_MSG_2,%s}\n", m2_buffer);
+  printf("{MIC,MSG_2,%s}\n", m2_buffer);
 }
 
 void output_wrong_pmkid_key_data_type(uint8_t key_type) {
-  printf("{WRONG_PMKID_KEY_TYPE,%02X,}\n", key_type);
+  printf("{PMKID,WRONG_KEY_TYPE,%02X,}\n", key_type);
 }
