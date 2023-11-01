@@ -12,7 +12,6 @@
 #include "arpa/inet.h"
 #include "eapol_frame.h"
 #include "frame_constants.h"
-#include "frame_output.h"
 
 uint8_t eapol_valid_pmkid(wpa_key_data_t *key_data) {
   uint8_t data_type = key_data->key_data_type;
@@ -20,22 +19,19 @@ uint8_t eapol_valid_pmkid(wpa_key_data_t *key_data) {
   uint8_t oui_type = key_data->oui_type;
 
   if (data_type != WPA_KEY_DATA_TYPE) {
-    output_wrong_pmkid_key_data_type(data_type);
+    printf("{PMKID,WRONG_KEY_TYPE,%02X,}\n", data_type);
     return WRONG_PMKID;
   }
 
   for (uint8_t i = 0; i < 3; i++) {
     if (oui[i] != WPA_KEY_DATA_OUI[i]) {
-      printf(
-          "eapol_validator.eapol_valid_pmkid > Wrong pmkid oui: %02X%02X%02X\n",
-          oui[0], oui[1], oui[2]);
+      printf("{PMKID,WRONG_OUI,%02X%02X%02X,}\n", oui[0], oui[1], oui[2]);
       return WRONG_PMKID;
     }
   }
 
   if (oui_type != WPA_KEY_DATA_TYPE_PMKID_KDE) {
-    printf("eapol_validator.eapol_valid_pmkid > Wrong pmkid oui type: %02X\n",
-           oui_type);
+    printf("{PMKID,WRONG_KDE,%02X,}\n", oui_type);
     return WRONG_PMKID;
   }
   return GOOD_PMKID;

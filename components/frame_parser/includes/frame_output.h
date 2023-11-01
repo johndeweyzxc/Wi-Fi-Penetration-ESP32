@@ -75,9 +75,3 @@ void output_anonce_from_message_1(eapol_frame_t *message_1);
  * @param *message_2 eapol data of the second message from 4 way handshake
  */
 void output_mic_from_message_2(eapol_frame_t *message_2);
-
-/*
- * @brief Indicates that the PMKID received has wrong data type
- * @param key_type The key data type value that is received
- */
-void output_wrong_pmkid_key_data_type(uint8_t key_type);

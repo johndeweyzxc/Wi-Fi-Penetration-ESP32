@@ -35,3 +35,13 @@ uint8_t convert_to_uint8_t(char s1, char s2) {
   free(s);
   return uint8_bit;
 }
+
+void print_string_into_hex(uint8_t *ssid) {
+  for (uint8_t i = 0; i < 33; i++) {
+    if (ssid[i] == 0) {
+      break;
+    }
+    printf("%02X", ssid[i]);
+  }
+  printf(",");
+}

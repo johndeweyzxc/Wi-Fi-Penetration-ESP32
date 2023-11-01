@@ -147,9 +147,11 @@ void arma_pmkid(char *target_bssid) {
     uint8_t *bssid = ap_record.bssid;
 
     vTaskDelay(200 / portTICK_PERIOD_MS);
-    printf("{PMKID,SCAN,%02X%02X%02X%02X%02X%02X,%s,%d,%u,}\n", bssid[0],
-           bssid[1], bssid[2], bssid[3], bssid[4], bssid[5], ap_record.ssid,
-           ap_record.rssi, ap_record.primary);
+
+    printf("{PMKID,SCAN,%02X%02X%02X%02X%02X%02X,", bssid[0], bssid[1],
+           bssid[2], bssid[3], bssid[4], bssid[5]);
+    print_string_into_hex(ap_record.ssid);
+    printf("%d,%u,}\n", ap_record.rssi, ap_record.primary);
 
     if (memcmp(ap_record.bssid, u_target_bssid, 6) == 0) {
       found_target_ap = 1;
