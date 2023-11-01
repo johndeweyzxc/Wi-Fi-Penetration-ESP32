@@ -10,6 +10,8 @@ Author: johndeweyzxc (johndewey02003@gmail.com)
 from serial import Serial
 import threading
 import yaml
+import argparse
+import sys
 
 MAX_BUFF_LEN = 255
 OUT_YELLOW = "\033[93m"
@@ -18,6 +20,7 @@ stop_thread = threading.Event()
 scanned_aps = {}
 mic_info = {}
 pmkid_info = {}
+test_mode = "debug"
 
 
 def generate_eapol_message_1_yaml(message_1: list):
@@ -56,7 +59,9 @@ def generate_eapol_message_2_yaml(message_2: list):
     mic_info["mic"] = message_2[12]
     mic_info["m2_data"] = "".join(m2_data)
 
-    # * A PSK or passphrase should be provided on the mic_test.yaml file
+    # ! A PSK or passphrase should be provided in the mic yaml file
+    # ! The SSID should also be replaced with the ascii equivalent of the hex string
+    # TODO: Convert the SSID from hexadecimal string to ascii
     mic_yaml = f"""
     psk:
     ssid: {mic_info['ssid']}
@@ -69,7 +74,13 @@ def generate_eapol_message_2_yaml(message_2: list):
     """
     mic = yaml.safe_load(mic_yaml)
 
-    with open("mic_test.yaml", "w") as mic_file:
+    file_path = ""
+    if test_mode == "debug":
+        file_path = "../crypto/mic_debug.yaml"
+    elif test_mode == "prod":
+        file_path = "../crypto/mic.yaml"
+
+    with open(file_path, "w") as mic_file:
         yaml.dump(mic, mic_file)
 
 
@@ -82,7 +93,9 @@ def generate_eapol_pmkid_message_1_yaml(message_1: list):
         if key == message_1[2]:
             ap_ssid = value
 
-    # * A PSK or passphrase should be provided on the pmkid_test.yaml file
+    # ! A PSK or passphrase should be provided in the pmkid yaml file
+    # ! The SSID should also be replaced with the ascii equivalent of the hex string
+    # TODO: Convert the SSID from hexadecimal string to ascii
     pmkid_yaml = f"""
     psk: 
     ssid: {ap_ssid}
@@ -92,12 +105,18 @@ def generate_eapol_pmkid_message_1_yaml(message_1: list):
     """
     pmkid = yaml.safe_load(pmkid_yaml)
 
-    with open("pmkid_test.yaml", "w") as pmkid_file:
+    file_path = ""
+    if test_mode == "debug":
+        file_path = "../crypto/pmkid_debug.yaml"
+    elif test_mode == "prod":
+        file_path = "../crypto/pmkid.yaml"
+
+    with open(file_path, "w") as pmkid_file:
         yaml.dump(pmkid, pmkid_file)
 
 
 def handle_ssid_from_scanned_aps(scan: list):
-    # * Create new key value pair where key is the mac address and the value is the SSID
+    # * This creates new key value pair where key is the mac address and the value is the SSID
     scanned_aps[f"{scan[2]}"] = scan[3]
 
 
@@ -182,6 +201,19 @@ def execute_write_thread(port: Serial):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("test_mode")
+    args = parser.parse_args()
+
+    # * When debug is set the script will write the PMKID or MIC information in mic_debug.yaml or pmkid_debug.yaml
+    if args.test_mode == "debug":
+        test_mode = "debug"
+    elif args.test_mode == "prod":
+        test_mode = "prod"
+    else:
+        print("Invalid argument")
+        sys.exit()
+
     port = Serial(port="COM3", baudrate=19200, timeout=1)
     read_thread = threading.Thread(target=execute_read_thread, args=(port,))
     write_thread = threading.Thread(target=execute_write_thread, args=(port,))

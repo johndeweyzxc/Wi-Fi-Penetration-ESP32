@@ -73,7 +73,7 @@ def calculate_ptk(psk, ssid, bssid, sta_mac, snonce, anonce) -> bytes:
     return ptk
 
 
-def calculate_pmkid(psk, ssid, bssid, sta_mac):
+def calculate_pmkid(pmkid, psk, ssid, bssid, sta_mac):
     """
     PMKID is a unique identifier that helps facilitate the secure exchange of authentication 
     and encryption keys between a client device and an access point during the initial 
@@ -87,10 +87,14 @@ def calculate_pmkid(psk, ssid, bssid, sta_mac):
     """
 
     pmk = calculate_pmk(psk, ssid)
-    pmkid = hmac.new(pmk, b'PMK Name' + a2b_hex(bssid) +
-                     a2b_hex(sta_mac), hashlib.sha1)
-    pmkid_hex = pmkid.hexdigest()[0:32]
-    print(f"PMKID: {pmkid_hex.upper()}")
+    calculated_pmkid = hmac.new(pmk, b'PMK Name' + a2b_hex(bssid) +
+                                a2b_hex(sta_mac), hashlib.sha1)
+
+    print(f"PMKID: {calculated_pmkid.hexdigest()[0:32].upper()}")
+    if calculated_pmkid.hexdigest()[0:32].upper() == pmkid:
+        print(f"{OUT_GREEN}PMKID MATCHED!{COLOR_RESET}")
+    else:
+        print(f"{OUT_RED}PMKID NOT MATCHED!{COLOR_RESET}")
 
 
 def calculate_mic(psk, ssid, anonce, snonce, bssid, sta_mac, message_2_data, mic):
@@ -109,6 +113,7 @@ def calculate_mic(psk, ssid, anonce, snonce, bssid, sta_mac, message_2_data, mic
     """
     ptk = calculate_ptk(psk, ssid, bssid, sta_mac, snonce, anonce)
     calculated_mic = hmac.new(ptk[0:16], a2b_hex(message_2_data), hashlib.sha1)
+
     print(f"MIC: {calculated_mic.hexdigest()[:32].upper()}")
     if calculated_mic.hexdigest()[:32].upper() == mic:
         print(f"{OUT_GREEN}MIC MATCHED!{COLOR_RESET}")
@@ -136,10 +141,11 @@ if __name__ == "__main__":
 
         psk = pmkid_content["psk"]
         ssid = pmkid_content["ssid"]
+        pmkid = pmkid_content["pmkid"]
         bssid = pmkid_content["bssid"]
         sta_mac = pmkid_content["sta_mac"]
 
-        calculate_pmkid(psk, ssid, bssid, sta_mac)
+        calculate_pmkid(pmkid, psk, ssid, bssid, sta_mac)
     elif args.mode == "MIC":
         with open("mic.yaml", "r") as mic_file:
             mic_content = yaml.safe_load(mic_file)
