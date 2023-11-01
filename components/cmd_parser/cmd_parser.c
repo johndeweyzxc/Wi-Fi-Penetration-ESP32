@@ -40,14 +40,6 @@ void set_arma_and_target(char *user_in_buff, char *arma_selected,
 
   user_in_buff += 2;
   memcpy(target_bssid, user_in_buff, 12);
-
-  char *b = target_bssid;
-  printf(
-      "cmd_parser.set_arma_and_target > Target set AP: "
-      "%c%c%c%c%c%c%c%c%c%c%c%c\n",
-      b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11]);
-  printf("cmd_parser.set_arma_and_target > Armament set: %c%c\n",
-         arma_selected[0], arma_selected[1]);
 }
 
 void set_arma_selected(char *user_in_buff, char *arma_selected) {
@@ -96,34 +88,44 @@ void cmd_instruction_input(char *user_in_buff, char *arma_selected,
   if (memcmp(user_in_buff, RECONNAISSANCE, 2) == 0) {
     printf("cmd_parser.cmd_instruction_input > Using RECONNAISSANCE\n");
     set_arma_selected(user_in_buff, arma_selected);
+
+    printf("{CMD_PARSER,TARGET_ARMA_SET,%c%c,000000000000,}\n",
+           arma_selected[0], arma_selected[1]);
   } else {
     set_arma_and_target(user_in_buff, arma_selected, target_bssid);
+
+    char *b = target_bssid;
+    printf("{CMD_PARSER,TARGET_ARMA_SET,%c%c,%c%c%c%c%c%c%c%c%c%c%c%c,}\n",
+           arma_selected[0], arma_selected[1], b[0], b[1], b[2], b[3], b[4],
+           b[5], b[6], b[7], b[8], b[9], b[10], b[11]);
   }
   clear_user_in_buff(user_in_buff);
 }
 
 void cmd_parser() {
   char user_in_buff[14];
-  user_in_buff[0] = '0';
-  user_in_buff[1] = '0';
+  for (uint8_t i = 0; i < 14; i++) {
+    user_in_buff[i] = '0';
+  }
 
   char arma_selected[2];
+  arma_selected[0] = '0';
+  arma_selected[1] = '0';
+
   char target_bssid[12];
+  for (uint8_t i = 0; i < 12; i++) {
+    target_bssid[i] = '0';
+  }
 
   while (1) {
     vTaskDelay(CMD_INPUT_DELAY / portTICK_PERIOD_MS);
     scanf("%14s", user_in_buff);
 
     if (memcmp(user_in_buff, ARMA_STATUS, 2) == 0) {
-      if (arma_selected[0] == '0' && arma_selected[1] == '1') {
-        printf("{CMD_PARSER,CURRENT_ARMA,%c%c,}\n", arma_selected[0],
-               arma_selected[1]);
-      } else {
-        char *b = target_bssid;
-        printf("{CMD_PARSER,CURRENT_ARMA,%c%c,%c%c%c%c%c%c%c%c%c%c%c%c,}\n",
-               arma_selected[0], arma_selected[1], b[0], b[1], b[2], b[3], b[4],
-               b[5], b[6], b[7], b[8], b[9], b[10], b[11]);
-      }
+      char *b = target_bssid;
+      printf("{CMD_PARSER,CURRENT_ARMA,%c%c,%c%c%c%c%c%c%c%c%c%c%c%c,}\n",
+             arma_selected[0], arma_selected[1], b[0], b[1], b[2], b[3], b[4],
+             b[5], b[6], b[7], b[8], b[9], b[10], b[11]);
       clear_user_in_buff(user_in_buff);
     } else if (memcmp(user_in_buff, ARMA_ACTIVATE, 2) == 0) {
       cmd_ctrl_input_activate(user_in_buff, arma_selected, target_bssid);

@@ -1,9 +1,12 @@
 build
 .vscode
+test/Launcher-Module-State-Machine-Diagram.drawio
+test/Launcher-Module-State-Machine-Diagram.png
 test/test_cases.txt
 test/mic_test.yaml
 test/pmkid_test.yaml
 docs/Key-Hierarchy.drawio
+docs/Automatic-Wifi-Penetration-System-Architecture.drawio
 docs/Launcher-Module-Software-Architecture.drawio
 docs/4-Way-Handshake.drawio
 crypto/key_hierarchy_calculation_test.py

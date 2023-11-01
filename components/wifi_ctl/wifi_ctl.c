@@ -145,8 +145,8 @@ void received_frame(void *buf, wifi_promiscuous_pkt_type_t type) {
   }
 
   size_t data_size = frame->rx_ctrl.sig_len + sizeof(wifi_promiscuous_pkt_t);
-  ESP_ERROR_CHECK(
-      esp_event_post(FRAME_RECEIVED_EVENT_BASE, event_id, frame, data_size, 0));
+  ESP_ERROR_CHECK(esp_event_post(FRAME_RECEIVED_EVENT_BASE, event_id, frame,
+                                 data_size, portMAX_DELAY));
 }
 
 void wifi_sniffer_start() {
