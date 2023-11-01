@@ -78,10 +78,10 @@ void arma_pmkid_finishing_sequence() {
   printf("{PMKID,FINISHING_SEQUENCE,}\n");
   frame_parser_unregister_data_frame_handler();
   frame_parser_clear_target_parameter();
+  arma_delete_task_pmkid_sniff_duration();
   arma_pmkid_notif_event_unregister();
   wifi_sniffer_stop();
   wifi_disconnect_from_ap(u_target_bssid);
-  arma_delete_task_pmkid_sniff_duration();
 }
 
 void arma_pmkid_sniff_duration() {

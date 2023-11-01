@@ -77,9 +77,9 @@ void arma_mic_finishing_sequence() {
   printf("{MIC,FINISHING_SEQUENCE,}\n");
   frame_parser_unregister_data_frame_handler();
   frame_parser_clear_target_parameter();
+  arma_mic_delete_task_deauth_inject();
   arma_mic_notif_event_unregister();
   wifi_sniffer_stop();
-  arma_mic_delete_task_deauth_inject();
 }
 
 void arma_mic_inject_deauth() {

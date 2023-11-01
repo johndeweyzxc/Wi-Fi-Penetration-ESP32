@@ -122,7 +122,7 @@ void output_mic_from_message_2(eapol_frame_t *message_2) {
   // Receiver address (Access point mac address)
   put_mac_addr_in_buff(p_m2_buffer, mac_header_message_2->receiver_addr);
   p_m2_buffer += 13;
-  // Version, Type, Length and Key Description Type
+  // Version, Type, Length, Key Description Type, Key Information and Key Length
   put_m2_info_in_buff(p_m2_buffer, auth_message_2);
   p_m2_buffer += 24;
   // Replay counter
@@ -131,6 +131,28 @@ void output_mic_from_message_2(eapol_frame_t *message_2) {
   // Snonce (Station nonce)
   put_nonce_in_buff(p_m2_buffer, auth_message_2->wpa_key_nonce);
   p_m2_buffer += 65;
+
+  // * Normally a second message from 4 way handshake the IV, RSC and the ID in
+  // * the authentication data is set to all zero. If any of them is not zero
+  // * the print function in the for loop will notify the command launch module.
+  for (uint8_t i = 0; i < 16; i++) {
+    if (auth_message_2->wpa_key_iv[i] != 0) {
+      printf("{MIC,IV_RSC_ID,IV_NOT_ZERO,}\n");
+      break;
+    }
+  }
+
+  for (uint8_t i = 0; i < 8; i++) {
+    if (auth_message_2->wpa_key_rsc[i] != 0) {
+      printf("{MIC,IV_RSC_ID,RSC_NOT_ZERO,}\n");
+      break;
+    }
+    if (auth_message_2->wpa_key_id[i] != 0) {
+      printf("{MIC,IV_RSC_ID,ID_NOT_ZERO,}\n");
+      break;
+    }
+  }
+
   // MIC (Message Integrity Check)
   put_key_in_buff(p_m2_buffer, auth_message_2->wpa_key_mic);
   p_m2_buffer += 33;

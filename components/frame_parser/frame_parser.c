@@ -22,11 +22,14 @@ ESP_EVENT_DEFINE_BASE(ARMAMENT_ATTACK_STATUS_EVENT_BASE);
 static uint8_t u_target_bssid[6];
 static uint8_t parse_type = NULL_PARSE_TYPE;
 
-// For MIC parsing, current eapol message number
+// * For MIC based attack, current eapol message number, curr_eapol_m_num = 1
+// * if the first message of 4 way handshake is received
 static uint8_t curr_eapol_m_num = 0;
-// For MIC parsing, current eapol station mac address
+// * For MIC based attack, current eapol station mac address, the station that
+// * receives the anonce from the first message of 4 way hanshake
 static uint8_t curr_eapol_sta_mac[6];
-// For MIC parsing, flag if message 2 is received
+// * For MIC based attack, received_eapol_message_2 = 1 if the second message of
+// * 4 way handshake is received
 static uint8_t received_eapol_message_2 = 0;
 
 void pmkid_notify_armament() {
@@ -61,12 +64,23 @@ void mic_notify_armament() {
 }
 
 void parse_anonce_message_1(mac_header_t *mac_header, eapol_frame_t *msg_1) {
+  // * This is the first message of 4 way handshake, the access point transmit
+  // * the anonce and the client is the receiver
+
   if (curr_eapol_m_num == 0) {
+    // This is the first time when the first message of 4 way handshake is
+    // received, if curr_eapol_m_num is 1 then the first message is received
+    // for the second or third time
     output_anonce_from_message_1(msg_1);
     memcpy(curr_eapol_sta_mac, mac_header->receiver_addr, 6);
     curr_eapol_m_num = 1;
 
   } else if (curr_eapol_m_num == 1) {
+    // If the first message of 4 way handshake is received and the receiver
+    // address or the client does not match with the first message that we
+    // previously captured then we update the curr_eapol_sta_mac with the new
+    // client. Otherwise its a retransmission of the first message
+
     if (memcmp(curr_eapol_sta_mac, mac_header->receiver_addr, 6) != 0) {
       output_anonce_from_message_1(msg_1);
       memcpy(curr_eapol_sta_mac, mac_header->receiver_addr, 6);
@@ -75,6 +89,9 @@ void parse_anonce_message_1(mac_header_t *mac_header, eapol_frame_t *msg_1) {
 }
 
 void parse_mic_message_2(mac_header_t *mac_header, eapol_frame_t *msg_2) {
+  // * This is the second message of 4 way handshake, the client transmit
+  // * the snonce, mic and other information. The access point is the receiver
+
   if (curr_eapol_m_num == 1) {
     if (received_eapol_message_2 == 1) {
       return;
