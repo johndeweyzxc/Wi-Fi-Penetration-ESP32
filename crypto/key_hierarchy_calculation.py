@@ -92,6 +92,11 @@ def calculate_pmkid(pmkid, psk, ssid, bssid, sta_mac):
 
     print(f"PMKID: {calculated_pmkid.hexdigest()[0:32].upper()}")
     if calculated_pmkid.hexdigest()[0:32].upper() == pmkid:
+        """
+        The calculated PMKID and the provided PMKID matched which means the output from the
+        launcher and the launcher itself is working as expected
+        """
+
         print(f"{OUT_GREEN}PMKID MATCHED!{COLOR_RESET}")
     else:
         print(f"{OUT_RED}PMKID NOT MATCHED!{COLOR_RESET}")
@@ -116,27 +121,31 @@ def calculate_mic(psk, ssid, anonce, snonce, bssid, sta_mac, message_2_data, mic
 
     print(f"MIC: {calculated_mic.hexdigest()[:32].upper()}")
     if calculated_mic.hexdigest()[:32].upper() == mic:
+        """
+        The calculated MIC and the provided MIC matched which means the output from the
+        launcher and the launcher itself is working as expected
+        """
+
         print(f"{OUT_GREEN}MIC MATCHED!{COLOR_RESET}")
     else:
         print(f"{OUT_RED}MIC NOT MATCHED!{COLOR_RESET}")
 
 
-def set_mic_to_all_zero(mic) -> str:
-    """ Sets the MIC value to all zero of the second message from the 4-way handshake """
-
-    mic_list = list(mic)
-    for i in range(162, 195):
-        mic_list[i] = '0'
-    return "".join(mic_list)
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("attack_type")
     parser.add_argument("mode")
     args = parser.parse_args()
 
-    if args.mode == "PMKID":
-        with open("pmkid.yaml", "r") as pmkid_file:
+    if args.attack_type == "PMKID":
+        file_path_of_pmkid = ""
+
+        if args.mode == "debug":
+            file_path_of_pmkid = "pmkid_debug.yaml"
+        elif args.mode == "prod":
+            file_path_of_pmkid = "pmkid.yaml"
+
+        with open(file_path_of_pmkid, "r") as pmkid_file:
             pmkid_content = yaml.safe_load(pmkid_file)
 
         psk = pmkid_content["psk"]
@@ -146,8 +155,15 @@ if __name__ == "__main__":
         sta_mac = pmkid_content["sta_mac"]
 
         calculate_pmkid(pmkid, psk, ssid, bssid, sta_mac)
-    elif args.mode == "MIC":
-        with open("mic.yaml", "r") as mic_file:
+    elif args.attack_type == "MIC":
+        file_path_of_mic = ""
+
+        if args.mode == "debug":
+            file_path_of_mic = "mic_debug.yaml"
+        elif args.mode == "prod":
+            file_path_of_mic = "mic.yaml"
+
+        with open(file_path_of_mic, "r") as mic_file:
             mic_content = yaml.safe_load(mic_file)
 
         psk = mic_content["psk"]
@@ -157,6 +173,6 @@ if __name__ == "__main__":
         anonce = mic_content["anonce"]
         snonce = mic_content["snonce"]
         mic = mic_content["mic"]
-        m2_data = set_mic_to_all_zero(mic_content["m2_data"])
+        m2_data = mic_content["m2_data"]
 
         calculate_mic(psk, ssid, anonce, snonce, bssid, sta_mac, m2_data, mic)

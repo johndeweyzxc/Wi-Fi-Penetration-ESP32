@@ -24,10 +24,14 @@ test_mode = "debug"
 
 
 def generate_eapol_message_1_yaml(message_1: list):
-    """ Saves important info to create a mic yaml file that can be read by key_hierarchy_calculation.py """
+    """ 
+    Saves important info to create a mic yaml file that can be read by 
+    key_hierarchy_calculation.py 
+    """
 
     for (key, value) in scanned_aps.items():
-        # * Message 1 is the transmitter address
+        # * Get the SSID from the scanned access point dictionary by checking if the
+        # * transmitter mac address is equal to the key in dictionary
         if key == message_1[2]:
             mic_info["ssid"] = value
 
@@ -36,7 +40,10 @@ def generate_eapol_message_1_yaml(message_1: list):
 
 
 def generate_eapol_message_2_yaml(message_2: list):
-    """ Generates a mic yaml file that can be read by key_hierarchy_calculation.py """
+    """ 
+    Generates a mic yaml file that can be read by 
+    key_hierarchy_calculation.py 
+    """
 
     mic_info["sta_mac"] = message_2[2]
     mic_info["snonce"] = message_2[11]
@@ -59,12 +66,13 @@ def generate_eapol_message_2_yaml(message_2: list):
     mic_info["mic"] = message_2[12]
     mic_info["m2_data"] = "".join(m2_data)
 
+    # Converts the SSID from hex string to ascii
+    ascii_ssid = bytes.fromhex(mic_info['ssid']).decode("utf-8")
+
     # ! A PSK or passphrase should be provided in the mic yaml file
-    # ! The SSID should also be replaced with the ascii equivalent of the hex string
-    # TODO: Convert the SSID from hexadecimal string to ascii
     mic_yaml = f"""
     psk:
-    ssid: {mic_info['ssid']}
+    ssid: {ascii_ssid}
     bssid: {mic_info['bssid']}
     sta_mac: {mic_info['sta_mac']}
     anonce: {mic_info['anonce']}
@@ -89,16 +97,18 @@ def generate_eapol_pmkid_message_1_yaml(message_1: list):
 
     ap_ssid = ""
     for (key, value) in scanned_aps.items():
-        # * Message 1 is the transmitter address
+        # * Get the SSID from the scanned access point dictionary by checking if the
+        # * transmitter mac address is equal to the key in dictionary
         if key == message_1[2]:
             ap_ssid = value
 
+    # Converts the SSID from hex string to ascii
+    ascii_ssid = bytes.fromhex(ap_ssid).decode("utf-8")
+
     # ! A PSK or passphrase should be provided in the pmkid yaml file
-    # ! The SSID should also be replaced with the ascii equivalent of the hex string
-    # TODO: Convert the SSID from hexadecimal string to ascii
     pmkid_yaml = f"""
     psk: 
-    ssid: {ap_ssid}
+    ssid: {ascii_ssid}
     bssid: {message_1[2]}
     sta_mac: {message_1[3]}
     pmkid: {message_1[4]}
@@ -116,7 +126,10 @@ def generate_eapol_pmkid_message_1_yaml(message_1: list):
 
 
 def handle_ssid_from_scanned_aps(scan: list):
-    # * This creates new key value pair where key is the mac address and the value is the SSID
+    """
+    This creates new key value pair where key is the mac address and the 
+    value is the SSID
+    """
     scanned_aps[f"{scan[2]}"] = scan[3]
 
 
@@ -172,7 +185,10 @@ def execute_read_thread(port: Serial):
             value_list = list(value_str)
             value_list.remove("{")
             value_list.remove("}")
-            # * Convert the list back to string then split it by "," which makes it a list again
+            """
+            Convert the list back to string then split it by "," which makes it a 
+            list again
+            """
             value_content = "".join(value_list).split(",")
             generate_eapol_message(value_content)
 
@@ -205,7 +221,10 @@ if __name__ == "__main__":
     parser.add_argument("test_mode")
     args = parser.parse_args()
 
-    # * When debug is set the script will write the PMKID or MIC information in mic_debug.yaml or pmkid_debug.yaml
+    """
+    When debug is set the script will write the PMKID or MIC information in 
+    mic_debug.yaml or pmkid_debug.yaml
+    """
     if args.test_mode == "debug":
         test_mode = "debug"
     elif args.test_mode == "prod":
