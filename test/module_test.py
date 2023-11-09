@@ -55,15 +55,15 @@ def generate_eapol_message_2_yaml(message_2: list):
     m2_data.append(message_2[8])  # Key Information
     m2_data.append(message_2[9])  # Key Length
     m2_data.append(message_2[10])  # Replay Counter
-    m2_data.append(message_2[11])  # Snonce or Station nonce
-    m2_data.append("00000000000000000000000000000000")  # Key IV
-    m2_data.append("0000000000000000")  # WPA Key RSC
-    m2_data.append("0000000000000000")  # WPA Key ID
+    m2_data.append(message_2[11])  # WPA Key Nonce (Snonce or Station nonce)
+    m2_data.append(message_2[12])  # WPA Key IV
+    m2_data.append(message_2[13])  # WPA Key RSC
+    m2_data.append(message_2[14])  # WPA Key ID
     m2_data.append("00000000000000000000000000000000")  # MIC, all set to zero
-    m2_data.append("0016")  # WPA Key Data Length
-    m2_data.append(message_2[13])  # WPA Key Data
+    m2_data.append(message_2[16])  # WPA Key Data Length
+    m2_data.append(message_2[17])  # WPA Key Data
 
-    mic_info["mic"] = message_2[12]
+    mic_info["mic"] = message_2[15]
     mic_info["m2_data"] = "".join(m2_data)
 
     # Converts the SSID from hex string to ascii
@@ -142,7 +142,7 @@ def generate_eapol_message(value_content: list):
     Size of scan output: 7
     Size of MIC message 2: 15
     """
-    if len(value_content) == 15 or len(value_content) == 6 or len(value_content) == 7:
+    if len(value_content) == 19 or len(value_content) == 6 or len(value_content) == 7:
         if value_content[0] == "MIC" and value_content[1] == "MSG_1":
             generate_eapol_message_1_yaml(value_content)
         elif value_content[0] == "MIC" and value_content[1] == "MSG_2":

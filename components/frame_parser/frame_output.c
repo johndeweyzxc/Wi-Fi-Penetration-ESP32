@@ -60,6 +60,29 @@ void put_replay_counter_in_buff(char *char_buff, uint8_t *rc) {
           rc[3], rc[4], rc[5], rc[6], rc[7]);
 }
 
+void put_key_iv_in_buff(char *char_buff, uint8_t *iv) {
+  sprintf(char_buff,
+          "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X,",
+          iv[0], iv[1], iv[2], iv[3], iv[4], iv[5], iv[6], iv[7], iv[8], iv[9],
+          iv[10], iv[11], iv[12], iv[13], iv[14], iv[15]);
+}
+
+void put_id_or_rsc_in_buff(char *char_buff, uint8_t *b) {
+  sprintf(char_buff, "%02X%02X%02X%02X%02X%02X%02X%02X,", b[0], b[1], b[2],
+          b[3], b[4], b[5], b[6], b[7]);
+}
+
+void put_key_data_length_in_buff(char *char_buff,
+                                 eapol_auth_data_t *auth_message_2) {
+  uint8_t key_data_len_b[2];
+
+  key_data_len_b[0] = (uint8_t)(auth_message_2->wpa_key_data_length & 0xFF);
+  key_data_len_b[1] =
+      (uint8_t)((auth_message_2->wpa_key_data_length >> 8) & 0xFF);
+
+  sprintf(char_buff, "%02X%02X,", key_data_len_b[0], key_data_len_b[1]);
+}
+
 void put_key_data_in_buff(char *char_buff, uint8_t *key_data, uint16_t length) {
   for (uint8_t i = 0; i < length; i++) {
     if (i == length - 1) {
@@ -113,7 +136,7 @@ void output_mic_from_message_2(eapol_frame_t *message_2) {
   eapol_auth_data_t *auth_message_2 = (eapol_auth_data_t *)message_2->auth_data;
   uint16_t key_data_length = ntohs(auth_message_2->wpa_key_data_length);
 
-  char m2_buffer[165 + (key_data_length + 1) + 50];
+  char m2_buffer[234 + (key_data_length + 1) + 50];
   char *p_m2_buffer = m2_buffer;
 
   // Transmitter address (Station mac address)
@@ -128,38 +151,29 @@ void output_mic_from_message_2(eapol_frame_t *message_2) {
   // Replay counter
   put_replay_counter_in_buff(p_m2_buffer, auth_message_2->replay_counter);
   p_m2_buffer += 17;
-  // Snonce (Station nonce)
+  // WPA Key Nonce (Snonce or Station nonce)
   put_nonce_in_buff(p_m2_buffer, auth_message_2->wpa_key_nonce);
   p_m2_buffer += 65;
-
-  // * Normally a second message from 4 way handshake the IV, RSC and the ID in
-  // * the authentication data is set to all zero. If any of them is not zero
-  // * the print function in the for loop will notify the command launch module.
-  for (uint8_t i = 0; i < 16; i++) {
-    if (auth_message_2->wpa_key_iv[i] != 0) {
-      printf("{MIC,IV_RSC_ID,IV_NOT_ZERO,}\n");
-      break;
-    }
-  }
-
-  for (uint8_t i = 0; i < 8; i++) {
-    if (auth_message_2->wpa_key_rsc[i] != 0) {
-      printf("{MIC,IV_RSC_ID,RSC_NOT_ZERO,}\n");
-      break;
-    }
-    if (auth_message_2->wpa_key_id[i] != 0) {
-      printf("{MIC,IV_RSC_ID,ID_NOT_ZERO,}\n");
-      break;
-    }
-  }
-
+  // WPA Key IV
+  put_key_iv_in_buff(p_m2_buffer, auth_message_2->wpa_key_iv);
+  p_m2_buffer += 33;
+  // WPA Key RSC
+  put_id_or_rsc_in_buff(p_m2_buffer, auth_message_2->wpa_key_rsc);
+  p_m2_buffer += 17;
+  // WPA Key ID
+  put_id_or_rsc_in_buff(p_m2_buffer, auth_message_2->wpa_key_id);
+  p_m2_buffer += 17;
   // MIC (Message Integrity Check)
   put_key_in_buff(p_m2_buffer, auth_message_2->wpa_key_mic);
   p_m2_buffer += 33;
+  // WPA Key Data Length
+  put_key_data_length_in_buff(p_m2_buffer, auth_message_2);
+  p_m2_buffer += 5;
   // WPA Key data
   put_key_data_in_buff(p_m2_buffer, auth_message_2->wpa_key_data,
                        key_data_length);
   p_m2_buffer += (key_data_length * 2);
+
   sprintf(p_m2_buffer, ",");
   printf("{MIC,MSG_2,%s}\n", m2_buffer);
 }
