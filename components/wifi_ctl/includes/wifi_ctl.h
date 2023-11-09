@@ -23,7 +23,7 @@ enum frame_event_id { DATA_FRAME, MGMT_FRAME, CTRL_FRAME, MISC_FRAME };
 /*
  * @brief Total maximum number of AP to scan
  */
-#define MAX_SCAN_AP 20
+#define MAX_SCAN_AP 50
 
 /*
  * @brief wifi_get_scan_aps() returns this struct

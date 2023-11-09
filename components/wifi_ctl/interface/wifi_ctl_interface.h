@@ -18,7 +18,7 @@ enum filter_type { MANAGEMENT, CTRL, DATA };
 /*
  * @brief Total maximum number of AP to scan
  */
-#define MAX_SCAN_AP 20
+#define MAX_SCAN_AP 50
 
 /*
  * @brief wifi_get_scan_aps() returns this struct
