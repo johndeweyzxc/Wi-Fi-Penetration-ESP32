@@ -69,15 +69,21 @@ You can use the 'key_hierarchy_calculation.py' Python script to see how to calcu
 
 ### PMKID Calculation
 ```shell
-python key_hierarchy_calculation.py PMKID
+python key_hierarchy_calculation.py PMKID debug
 ```
-Note: Make sure to put the necessary information in the pmkid.yaml file
+Note: Make sure to put the necessary information in the pmkid.yaml file if prod is set or pmkid_debug.yaml if debug is set
 
 ### MIC Calculation
 ```shell
-python key_hierarchy_calculation.py MIC
+python key_hierarchy_calculation.py MIC prod
 ```
-Note: Make sure to put the necessary information in the mic.yaml file
+Note: Make sure to put the necessary information in the mic.yaml file if prod is set or pmkid_debug.yaml if debug is set. It is also important to remember that the script is used in conjuction with the module_test.py in the test directory. The module_test.py processes the output from the ESP32 where it will generate a mic.yaml or pmkid.yaml file to store the information from the EAPOl. The key_hierarchy_calculation.py will take this information and calculates the PMKID or MIC. A MIC or PMKID must be provided in the yaml file, it will compare this calculated PMKID or MIC, if it matches then the launcher and its output is working as expected. Also to calculate the correct PMKID or MIC, a PSK or the plain text password must be provided in the yaml file.
+
+## DISCLAIMER
+
+The project AWPS is intended for educational purposes, with the primary goal of raising awareness and understanding of cybersecurity in a legal and ethical context. It is essential to clarify that this tool is NOT INTENDED to encourage or promote any form of unauthorized or unethical hacking activities. Ethical hacking, conducted with proper authorization and consent, plays a crucial role in enhancing the security of digital systems. This project seeks to promote responsible use of technology and responsible disclosure of vulnerabilities to help protect and secure digital environments.
+
+USAGE OF ALL TOOLS on this project for attacking targets without prior mutual consent is ILLEGAL. It is the end user’s responsibility to obey all applicable local, state, and federal laws. I assume no liability and are not responsible for any misuse or damage caused by this project or software.
 
 ## Glossary
 - **STA_MAC (Station Mac Address)** The mac address of the client that is connected to the AP
@@ -92,7 +98,3 @@ Note: Make sure to put the necessary information in the mic.yaml file
 - **TK1 and TK2 (Temporal Key 1 and 2)** These are symmetric keys used for encrypting and decrypting the data frames exchanged between the client and the access point.
 - **HMAC_SHA1_128 (Hash-Based Message Authentication Code Secure Hash Algorithm 1)** Specific hash-based message authentication code (HMAC) algorithm that uses the SHA-1 (Secure Hash Algorithm 1) hash function with a 128-bit output.
 - **HMAC_SHA1 (Hash-Based Message Authentication Code Secure Hash Algorithm 1)** Method of creating a keyed hash value that is used for message authentication and integrity verification in cryptography.
-
-## Disclaimer
-
-These processes, while discussed here for educational purposes, should be conducted within the boundaries of legal and ethical considerations, with the appropriate permissions and in compliance with relevant laws and regulations.
