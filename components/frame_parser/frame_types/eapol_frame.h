@@ -1,4 +1,4 @@
-/*
+/**
  * @file eapol_frame.h
  * @author johndeweyzxc (johndewey02003@gmail.com)
  * @brief Declaration of EAPOL data frame structure where key vital information
@@ -11,7 +11,7 @@
 
 #include "frame_constants.h"
 
-/*
+/**
  * @brief WPA PMKID key data (22 bytes)
  * See ref: 802.11-2016 12.7.2
  */
@@ -23,7 +23,7 @@ typedef struct {
   uint8_t pmkid[16];
 } wpa_key_data_t;
 
-/*
+/**
  * @brief Key information data (2 bytes)
  * See ref: 802.11-2016 12.7.2
  */
@@ -42,7 +42,7 @@ typedef struct {
   uint8_t key_descriptor_version : 3;
 } key_information_t;
 
-/*
+/**
  * @brief Authentication data. TODO: The length of MIC is dependent on the
  * negotiated AKM, see ref: 802.11-2016 12.7.3
  *
@@ -65,7 +65,7 @@ typedef struct __attribute__((__packed__)) {
   uint8_t wpa_key_data[];
 } eapol_auth_data_t;
 
-/*
+/**
  * @brief: Logical Link Control (8 bytes)
  */
 typedef struct {
@@ -76,7 +76,7 @@ typedef struct {
   uint16_t authentication_type;
 } logical_link_control_t;
 
-/*
+/**
  * @brief Structure of the eapol frame
  */
 typedef struct {
@@ -92,16 +92,16 @@ typedef struct {
 #define EAPOL_AUTH_TYPE 0x888e
 #define EAPOL_KEY_TYPE 0x03
 
-/*
+/**
  * See ref: 802.11-2016 [12.7.2]
  */
 #define WPA_KEY_DATA_TYPE 0xdd
-/*
+/**
  * See ref: 802.11-2016 [12.7.2]
  */
 #define WPA_KEY_DATA_TYPE_PMKID_KDE 4
 
-/*
+/**
  * See ref: 802.11-2016 [12.7.2, Table 12-6]
  */
 static const uint8_t WPA_KEY_DATA_OUI[3] = {0x00, 0x0f, 0xac};

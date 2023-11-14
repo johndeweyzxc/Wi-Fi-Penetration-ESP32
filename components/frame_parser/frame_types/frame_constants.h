@@ -1,4 +1,4 @@
-/*
+/**
  * @file frame_constants.h
  * @author johndeweyzxc (johndewey02003@gmail.com)
  * @brief Declaration of a frame structure that is found on all types of frame
@@ -6,7 +6,7 @@
 
 #pragma once
 
-/*
+/**
  * @brief Frame control (2 bytes)
  */
 typedef struct __attribute__((__packed__)) {
@@ -22,7 +22,7 @@ typedef struct __attribute__((__packed__)) {
   uint8_t htc_order : 1;
 } frame_control_t;
 
-/*
+/**
  * @brief Mac header (18 bytes)
  */
 typedef struct {

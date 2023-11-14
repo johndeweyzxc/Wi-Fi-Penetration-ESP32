@@ -1,4 +1,4 @@
-/*
+/**
  * @file main.c
  * @author johndeweyzxc (johndewey02003@gmail.com)
  * @brief Entrypoint of the app, app_main() creates default event loop and also

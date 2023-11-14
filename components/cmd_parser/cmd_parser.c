@@ -1,4 +1,4 @@
-/*
+/**
  * @file cmd_parser.c
  * @author johndeweyzxc (johndewey02003@gmail.com)
  * @brief Implements functionality for parsing the input command

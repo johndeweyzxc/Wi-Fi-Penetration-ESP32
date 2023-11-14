@@ -1,4 +1,4 @@
-/*
+/**
  * @file frame_parser.c
  * @author johndeweyzxc (johndewey02003@gmail.com)
  * @brief Implements functionality for parsing frames of type data
