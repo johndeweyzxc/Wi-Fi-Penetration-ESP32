@@ -18,11 +18,36 @@ For a deeper dive into the Command Launch Module's capabilities and further insi
 - **Reconnaissance** scans nearby AP and outputs the SSID, channel and RSSI of the AP.
 - **Deauth** injects deauthentication frames within the AP, effectively terminating the connection between the STA and the AP.
 
-## How to Hack or Penetrate the Wi-Fi using AWPS and GPU
+## How to Hack Wi-Fi using AWPS and GPU
 
 <img src="docs/How-to-hack-the-Wi-Fi.png" alt="How to hack the Wi-Fi">
 
 Note: The android device presented in the story is the Command Launch Module, the Launcher Module is attached to the Command Launch Module. The actor in step 3 does not send an HTTP request to the Rest API server. The actor directly configures the GPU via a software by typing in the commands and or configuring the rules for brute force, selecting / managing which GPU to use, etc. The Rest API server is also not available in the public internet as stated in step 2, it is only available as a local Rest API server in the LAN. Its primary role is to transport hash from the AWPS mobile to the server. It does not provide any input data validation nor any best practices when it comes it Rest API security.
+
+## Software Architecture
+
+<img src="docs/Launcher-Module-Software-Architecture.png" alt="Launcher Module Software Architecture" width="900">
+
+## Software Components
+
+This module consists of 4 main components, an application entrypoint and one auxiliary component. Here is the brief description of each component:
+- **main** The application's entry point initiates the spawning of the command input parser task.
+- **cmd_parser** It conducts a scan and parsing process of the user input, subsequently forwarding the parsed instruction code to the armament system.
+- **armament** It orchestrates the attack by governing the Wi-Fi behavior and the data parser.
+- **wifi_ctl** An interface for the management of Wi-Fi capabilities, encompassing functions such as enabling monitor mode and establishing connections to APs.
+- **frame_parser** Analyzes incoming data frames received from the Wi-Fi controller, identifying critical parameters such as PMKID and MIC, and subsequently provides the relevant information as output.
+- **frame_bypasser** An auxiliary component tasked with the injection of arbitrary frames.
+
+## Hardware Components
+
+In this project, three hardware components are employed: an Android device, USB OTG (On The Go), and the ESP32. While the project has been rigorously tested on the ESP32-WROOM-32D variant, it is expected to be compatible with any microcontroller based on the ESP32-WROOM-32 platform.
+
+<img src="docs/AWPS-Hardware.png" alt="AWPS Hardware" width="700">
+
+- **[1] Android Phone** This project employs an Android device as the command and control interface for the launcher module. The interface features a dedicated application that establishes communication with the launcher module through a USB On-The-Go (OTG) connection. The application is configured with a minimum API level of 24 (Android 7.0) and a maximum API level of 33 (Android 13). It is important to note that the application has been thoroughly tested on physical devices running Android versions 8.1 and 11.
+- **[2] USB OTG (On The Go)** The USB On-The-Go (OTG) interface facilitates both power supply and data transmission, enabling seamless communication between the command and control module and the launcher module. The USB On-The-Go (OTG) cable can be extended to a greater length, enabling the discreet placement of the ESP32 microcontroller inside a pocket or bag.
+- **[3] Micro USB Male to USB Male** The micro USB to USB male cable establishes a connection between the ESP32 device and a USB male port.
+- **[4] ESP32-WROOM-32D** This project leverages the ESP32 microcontroller as the dedicated launcher module. This microcontroller hosts an application that actively monitors incoming instruction codes and subsequently initiates the corresponding armament procedures in accordance with the received instructions. The ESP32 microcontroller is available for purchase at a competitive price point, starting from as low as $3.34 (approximately ₱190). The ESP32 is a compact and portable microcontroller, designed to easily fit within a pocket or bag, thus facilitating the concept of inconspicuous penetration testing.
 
 ## Usage
 ### Instruction Codes
@@ -56,31 +81,6 @@ Code:               Armament Code:          Armament Code Name:         Payload:
 "02A1B2C3D4E5F6"    "02"                    PMKID                       "A1B2C3D4E5F6"      Target BSSID        
 "01"                "01"                    Reconnaissance              N/A                 N/A
 ```
-
-## Software Components
-
-This module consists of 4 main components, an application entrypoint and one auxiliary component. Here is the brief description of each component:
-- **main** The application's entry point initiates the spawning of the command input parser task.
-- **cmd_parser** It conducts a scan and parsing process of the user input, subsequently forwarding the parsed instruction code to the armament system.
-- **armament** It orchestrates the attack by governing the Wi-Fi behavior and the data parser.
-- **wifi_ctl** An interface for the management of Wi-Fi capabilities, encompassing functions such as enabling monitor mode and establishing connections to APs.
-- **frame_parser** Analyzes incoming data frames received from the Wi-Fi controller, identifying critical parameters such as PMKID and MIC, and subsequently provides the relevant information as output.
-- **frame_bypasser** An auxiliary component tasked with the injection of arbitrary frames.
-
-## Hardware Components
-
-In this project, three hardware components are employed: an Android device, USB OTG (On The Go), and the ESP32. While the project has been rigorously tested on the ESP32-WROOM-32D variant, it is expected to be compatible with any microcontroller based on the ESP32-WROOM-32 platform.
-
-[INSERT PICTURE OF ESP32 ATTACHED TO ANDROID DEVICE VIA USB OTG]
-
-- **[1] Android Phone** This project employs an Android device as the command and control interface for the launcher module. The interface features a dedicated application that establishes communication with the launcher module through a USB On-The-Go (OTG) connection. The application is configured with a minimum API level of 24 (Android 7.0) and a maximum API level of 33 (Android 13). It is important to note that the application has been thoroughly tested on physical devices running Android versions 8.1 and 11.
-- **[2] USB OTG (On The Go)** The USB On-The-Go (OTG) interface facilitates both power supply and data transmission, enabling seamless communication between the command and control module and the launcher module. The USB On-The-Go (OTG) cable can be extended to a greater length, enabling the discreet placement of the ESP32 microcontroller inside a pocket or bag.
-- **[3] Micro USB Male to USB Male** The micro USB to USB male cable establishes a connection between the ESP32 device and a USB male port.
-- **[4] ESP32-WROOM-32D** This project leverages the ESP32 microcontroller as the dedicated launcher module. This microcontroller hosts an application that actively monitors incoming instruction codes and subsequently initiates the corresponding armament procedures in accordance with the received instructions. The ESP32 microcontroller is available for purchase at a competitive price point, starting from as low as $3.34 (approximately ₱190). The ESP32 is a compact and portable microcontroller, designed to easily fit within a pocket or bag, thus facilitating the concept of inconspicuous penetration testing.
-
-## Software Architecture
-
-<img src="docs/Launcher-Module-Software-Architecture.png" alt="Launcher Module Software Architecture">
 
 ## How to crack the PMKID or MIC to determine the PSK
 
