@@ -1,14 +1,18 @@
 # Key Hierarchy
 
-<img src="../docs/Key-Hierarchy.png" alt="Key Hierarchy">
+<p align="center">
+    <img src="../visuals/Key-Hierarchy.png" alt="Key Hierarchy">
+</p>
 
 ## 4-Way Hanshake Protocol
 
-<img src="../docs/4-Way-Handshake.png" alt="4-Way Handshake Protocol">
+<p align="center">
+    <img src="../visuals/4-Way-Handshake.png" alt="4-Way Handshake Protocol">
+</p>
 
 ## How to crack the PMKID and MIC
 
-The process of deducing the PSK by cracking the PMKID and MIC involves the extraction of critical cryptographic information from the initial and subsequent messages of the 4-way handshake. There are two primary methods for PSK determination: PMKID cracking and MIC cracking.
+The process of determining the PSK or the plain text password of Wifi by cracking the PMKID and MIC involves the extraction of critical cryptographic information from the initial and subsequent messages of the 4-way handshake. There are two primary methods for PSK determination: PMKID cracking and MIC cracking.
 
 ## PMKID Cracking
 
