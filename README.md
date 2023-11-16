@@ -1,10 +1,10 @@
 # AWPS (Automatic Wi-Fi Penetration System) Launcher Module
 
-AWPS is a powerful software crafted for effortlessly penetrating WiFi-enabled devices secured with WPA2. It harnesses the robust capabilities of the ESP32 microcontroller to execute a vital operation in Wi-Fi network penetration. By capturing key data elements like the PMKID and MIC, AWPS allows users to conduct offline brute force attacks. 
+AWPS is a penetration software for effortlessly penetrating WiFi-enabled devices secured with WPA2. AWPS provides a way for user to attack nearby access point using an android device automatically or manually. It harnesses the robust capabilities of the ESP32 microcontroller to execute a vital operation in Wi-Fi network penetration. By capturing key data elements like the PMKID and MIC, AWPS allows users to conduct offline brute force attacks using hashcat to derive the PSK or the password of the target Wi-Fi device. 
 
 The Launcher Module executes attack based on serial inputs, it offers direct user commands or integration with a Command Launch module. The Launcher Module prioritizes simplicity so it requires pairing with an external Command Launch Module for swift and error free execution of attacks. The AWPS Command Launch Module is an Android app, which provides a user-friendly interface for easy interaction with the Launcher Module. It allows user to execute attack at a single press of a button, scan nearby access points, and data management for storing the result of the attack.
 
-For a deeper dive into the Command Launch Module's capabilities and further insights, explore the repository here [INSERT REPO LINK].
+For a deeper dive into the Command Launch Module's capabilities and further insights, explore the repository [here](https://github.com/johndeweyzxc/AWPS-Command-Launch-Module).
 
 ## Features
 
