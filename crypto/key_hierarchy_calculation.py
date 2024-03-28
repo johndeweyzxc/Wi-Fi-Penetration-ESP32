@@ -64,9 +64,15 @@ def calculate_ptk(psk, ssid, bssid, sta_mac, snonce, anonce) -> bytes:
     a = b'Pairwise key expansion'
     min_max_mac = min(a2b_hex(bssid), a2b_hex(sta_mac)) + \
         max(a2b_hex(bssid), a2b_hex(sta_mac))
+    print(f"MIN_MAX_MAC: {hexlify(min_max_mac)}")
+
     min_max_nonce = min(a2b_hex(anonce), a2b_hex(snonce)) + \
         max(a2b_hex(anonce), a2b_hex(snonce))
+    print(f"MIN_MAX_NONCE: {hexlify(min_max_nonce)}")
+
     b = min_max_mac + min_max_nonce
+    print(f"a: {hexlify(a)}")
+    print(f"b: {hexlify(b)}")
     pmk = calculate_pmk(psk, ssid)
     ptk = prf512(pmk, a, b)
     print(f"PTK: {hexlify(ptk).decode('ascii').upper()}")
@@ -87,8 +93,9 @@ def calculate_pmkid(pmkid, psk, ssid, bssid, sta_mac):
     """
 
     pmk = calculate_pmk(psk, ssid)
-    calculated_pmkid = hmac.new(pmk, b'PMK Name' + a2b_hex(bssid) +
-                                a2b_hex(sta_mac), hashlib.sha1)
+    message = b'PMK Name' + a2b_hex(bssid) + a2b_hex(sta_mac)
+    print(f"message: {hexlify(message)}")
+    calculated_pmkid = hmac.new(pmk, message, hashlib.sha1)
 
     print(f"PMKID: {calculated_pmkid.hexdigest()[0:32].upper()}")
     if calculated_pmkid.hexdigest()[0:32].upper() == pmkid:
