@@ -1,0 +1,3 @@
+## Rest API
+
+This Rest API server is used to receive hashes from the Android device via HTTP protocol. It uses lite SQL database to store the hashes. To run the server, first create a virtual environment using the command `pip -m venv venv` then install the required packages `pip install requirements.txt`. After installing the packages do not forget to change the host in main.py depending on the assigned IPv4 on your device. Activate the environment `venv\Scripts\activate` then create the database `python create_database.py` after creating the database, you can now launch the script `python main.py`.
